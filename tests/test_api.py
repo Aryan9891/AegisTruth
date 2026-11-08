@@ -98,3 +98,9 @@ def test_report_export_html_endpoint():
     assert res.status_code == 200
     assert "AEGIS-TRUTH FORENSIC ATTESTATION" in res.text
 
+def test_download_browser_extension_endpoint():
+    res = client.get("/api/report/download-extension")
+    assert res.status_code == 200
+    assert res.headers["content-type"] == "application/zip"
+    assert len(res.content) > 1000
+

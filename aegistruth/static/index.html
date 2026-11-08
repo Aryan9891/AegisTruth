@@ -15,46 +15,144 @@
   <!-- Background Animated Neural Matrix Canvas -->
   <canvas id="bg-neural-canvas"></canvas>
 
-  <!-- Top Master Navigation Header -->
-  <header>
-    <div class="brand-wrapper" onclick="switchTab('tab-overview')">
-      <div class="shield-badge">&#x1F6E1;</div>
-      <div>
-        <div class="brand-title">AEGIS-TRUTH</div>
-        <div class="brand-subtitle">COGNITIVE DEFENSE SENTINEL</div>
+  <!-- Full App Layout with Side Navigation Bar -->
+  <div class="app-layout">
+    <!-- Side Navigation Bar -->
+    <aside id="app-sidebar" class="app-sidebar">
+      <!-- Sidebar Brand Header -->
+      <div class="sidebar-brand-wrapper" onclick="switchTab('tab-overview')">
+        <div class="shield-badge">&#x1F6E1;</div>
+        <div class="sidebar-brand-text">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span class="brand-title">AEGIS-TRUTH</span>
+            <span class="version-tag">v1.1</span>
+          </div>
+          <div class="brand-subtitle">COGNITIVE SENTINEL</div>
+        </div>
       </div>
-    </div>
 
-    <nav class="nav-tabs">
-      <button class="nav-tab active" data-tab="tab-overview">&#x1F4CA; Command Center</button>
-      <button class="nav-tab" data-tab="tab-visual">&#x1F441; Visual Forensics</button>
-      <button class="nav-tab" data-tab="tab-video">&#x1F3AC; Video Deepfakes</button>
-      <button class="nav-tab" data-tab="tab-audio">&#x1F3A4; Acoustic Forensics</button>
-      <button class="nav-tab" data-tab="tab-text">&#x1F4DD; Cognitive &amp; Facts</button>
-      <button class="nav-tab" data-tab="tab-guard">&#x1F512; Agent Zero-Trust</button>
-      <button class="nav-tab" data-tab="tab-proxy">&#x1F310; Universal AI Proxy</button>
-      <button class="nav-tab" data-tab="tab-provenance">&#x1F510; C2PA Audit Seal</button>
-    </nav>
+      <!-- Sidebar Navigation Menu with Categorized Sections -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">COMMAND &amp; RADAR</div>
+        <button class="nav-tab active" data-tab="tab-overview">
+          <span class="nav-icon">&#x1F4CA;</span>
+          <span class="nav-text">Command Center</span>
+          <span class="nav-shortcut">1</span>
+        </button>
 
-    <div class="header-actions">
-      <!-- Theme Accent Selector -->
-      <div class="theme-switcher-wrapper" title="Switch Cyberpunk Theme Accent">
-        <div class="theme-dot theme-cyan active" data-theme="cyan" title="Cyber Cyan Accent"></div>
-        <div class="theme-dot theme-purple" data-theme="purple" title="Ultraviolet Accent"></div>
-        <div class="theme-dot theme-emerald" data-theme="emerald" title="Matrix Emerald Accent"></div>
-        <div class="theme-dot theme-amber" data-theme="amber" title="Solar Amber Accent"></div>
+        <div class="nav-section-title">FORENSIC ARSENAL</div>
+        <button class="nav-tab" data-tab="tab-visual">
+          <span class="nav-icon">&#x1F441;</span>
+          <span class="nav-text">Visual Deepfakes</span>
+          <span class="nav-shortcut">2</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-video">
+          <span class="nav-icon">&#x1F3AC;</span>
+          <span class="nav-text">Temporal Video</span>
+          <span class="nav-shortcut">3</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-audio">
+          <span class="nav-icon">&#x1F3A4;</span>
+          <span class="nav-text">Voice Clone Lab</span>
+          <span class="nav-shortcut">4</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-text">
+          <span class="nav-icon">&#x1F4DD;</span>
+          <span class="nav-text">Cognitive &amp; Facts</span>
+          <span class="nav-shortcut">5</span>
+        </button>
+
+        <div class="nav-section-title">AGENT RUNTIME</div>
+        <button class="nav-tab" data-tab="tab-guard">
+          <span class="nav-icon">&#x1F512;</span>
+          <span class="nav-text">Agent Zero-Trust</span>
+          <span class="nav-shortcut">6</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-proxy">
+          <span class="nav-icon">&#x1F310;</span>
+          <span class="nav-text">Universal AI Proxy</span>
+          <span class="nav-shortcut">7</span>
+        </button>
+
+        <div class="nav-section-title">PROVENANCE</div>
+        <button class="nav-tab" data-tab="tab-provenance">
+          <span class="nav-icon">&#x1F510;</span>
+          <span class="nav-text">C2PA Audit Seal</span>
+          <span class="nav-shortcut">8</span>
+        </button>
+      </nav>
+
+      <!-- Sidebar Footer & Quick Controls -->
+      <div class="sidebar-footer">
+        <!-- Download Browser Extension Button -->
+        <a href="/api/report/download-extension" class="sidebar-download-btn" title="Download Chrome Extension (.zip)" download>
+          <span>&#x1F4E6;</span>
+          <span class="nav-text">Chrome Extension</span>
+          <span class="sidebar-tag">ZIP</span>
+        </a>
+
+        <!-- Theme Accent Switcher -->
+        <div class="sidebar-theme-row">
+          <span class="sidebar-row-label">Accent:</span>
+          <div class="theme-switcher-wrapper" title="Switch Cyberpunk Theme Accent">
+            <div class="theme-dot theme-cyan active" data-theme="cyan" title="Cyber Cyan Accent"></div>
+            <div class="theme-dot theme-purple" data-theme="purple" title="Ultraviolet Accent"></div>
+            <div class="theme-dot theme-emerald" data-theme="emerald" title="Matrix Emerald Accent"></div>
+            <div class="theme-dot theme-amber" data-theme="amber" title="Solar Amber Accent"></div>
+          </div>
+        </div>
+
+        <!-- Audio Toggle & Status -->
+        <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+          <button id="sound-toggle-btn" class="sound-toggle-btn active" title="Toggle cyber sound effects">
+            &#x1F50A; <span class="nav-text">SFX: ON</span>
+          </button>
+          <div class="status-pill" title="Sentinel status">
+            <div class="pulse-dot"></div>
+            <span id="system-status-text" class="nav-text">ACTIVE</span>
+          </div>
+        </div>
+
+        <!-- Collapse/Expand Sidebar Toggle -->
+        <button id="sidebar-toggle-btn" class="sidebar-collapse-btn" title="Toggle sidebar rail">
+          <span id="sidebar-toggle-icon">&#x25C4;</span>
+          <span class="nav-text">Collapse Rail</span>
+        </button>
       </div>
-      <button id="shortcut-cmd-k" class="shortcut-pill" title="Press Ctrl+K to search">&#x2318;K Search</button>
-      <button id="sound-toggle-btn" class="sound-toggle-btn active">&#x1F50A; Audio SFX: ON</button>
-      <div class="status-pill">
-        <div class="pulse-dot"></div>
-        <span id="system-status-text">SENTINEL ACTIVE</span>
-      </div>
-    </div>
-  </header>
+    </aside>
 
-  <!-- Main Container -->
-  <main>
+    <!-- Mobile Drawer Backdrop -->
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <!-- Main Workspace Container -->
+    <div class="app-workspace">
+      <!-- Top Workspace Header -->
+      <header class="workspace-header">
+        <div class="workspace-header-left">
+          <!-- Mobile Hamburger Toggle -->
+          <button id="mobile-menu-btn" class="mobile-hamburger-btn" title="Open Navigation Menu">
+            <span>&#x2630;</span>
+          </button>
+
+          <!-- Breadcrumb / Active Lab Indicator -->
+          <div class="workspace-breadcrumb-wrapper">
+            <span class="breadcrumb-label">ACTIVE LAB:</span>
+            <span id="workspace-active-tab-title" class="breadcrumb-active-title">Command Center</span>
+          </div>
+        </div>
+
+        <div class="workspace-header-right">
+          <button id="shortcut-cmd-k" class="shortcut-pill" title="Press Ctrl+K to search">
+            &#x2318;K Search Tools
+          </button>
+          <button class="btn-primary" id="btn-header-benchmark" style="padding: 7px 16px; font-size: 12px;">
+            &#x26A1; Run Diagnostics
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content Area -->
+      <main class="workspace-main">
     <!-- 1. OVERVIEW / COMMAND CENTER -->
     <section id="tab-overview" class="tab-content active">
       <!-- Top Actions Bar -->
@@ -732,7 +830,9 @@ No active scan manifest. Run an analysis in Visual, Acoustic, Video, or Cognitiv
         </pre>
       </div>
     </section>
-  </main>
+      </main>
+    </div>
+  </div>
 
   <!-- Command Palette Modal (Ctrl+K) -->
   <div id="cmd-palette-overlay" class="cmd-palette-overlay">

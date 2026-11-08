@@ -16,6 +16,7 @@ window.radarScores = {
 document.addEventListener("DOMContentLoaded", () => {
   initNeuralCanvas();
   initCommandCenterRadar();
+  initSidebar();
   initNavigation();
   initSoundToggle();
   initThemeSwitcher();
@@ -98,10 +99,22 @@ function initSoundToggle() {
   }
 }
 
-// 2. Tab Navigation with Cyber Animations
+// 2. Tab Navigation with Cyber Animations & Dynamic Breadcrumbs
+const TAB_TITLES = {
+  "tab-overview": "Command Center & Telemetry Radar",
+  "tab-visual": "Visual Deepfakes & Fourier Spectrum",
+  "tab-video": "Video Temporal Motion & Edge Flicker",
+  "tab-audio": "Acoustic Vocal Clone & Mel-Spectrogram",
+  "tab-text": "Cognitive Burstiness & Fact Contradictions",
+  "tab-guard": "Agent Zero-Trust Firewall & Jailbreak Shield",
+  "tab-proxy": "Universal AI Agent Gateway Proxy",
+  "tab-provenance": "C2PA Cryptographic Provenance Seal"
+};
+
 function initNavigation() {
   const tabs = document.querySelectorAll(".nav-tab");
   const contents = document.querySelectorAll(".tab-content");
+  const breadcrumbTitle = document.getElementById("workspace-active-tab-title");
 
   tabs.forEach(tab => {
     tab.addEventListener("click", () => {
@@ -116,8 +129,72 @@ function initNavigation() {
       if (targetContent) {
         targetContent.classList.add("active");
       }
+
+      if (breadcrumbTitle && TAB_TITLES[targetId]) {
+        breadcrumbTitle.textContent = TAB_TITLES[targetId];
+      }
+
+      // Close mobile drawer on selection
+      const sidebar = document.getElementById("app-sidebar");
+      const backdrop = document.getElementById("sidebar-backdrop");
+      if (sidebar && sidebar.classList.contains("mobile-open")) {
+        sidebar.classList.remove("mobile-open");
+        if (backdrop) backdrop.classList.remove("active");
+      }
     });
   });
+}
+
+function initSidebar() {
+  const sidebar = document.getElementById("app-sidebar");
+  const toggleBtn = document.getElementById("sidebar-toggle-btn");
+  const toggleIcon = document.getElementById("sidebar-toggle-icon");
+  const mobileBtn = document.getElementById("mobile-menu-btn");
+  const backdrop = document.getElementById("sidebar-backdrop");
+  const headerBenchmark = document.getElementById("btn-header-benchmark");
+
+  // Restore collapsed state
+  const isCollapsed = localStorage.getItem("aegis_sidebar_collapsed") === "true";
+  if (isCollapsed && sidebar) {
+    sidebar.classList.add("collapsed");
+    if (toggleIcon) toggleIcon.innerHTML = "&#x25BA;";
+  }
+
+  // Desktop sidebar collapse toggle
+  if (toggleBtn && sidebar) {
+    toggleBtn.addEventListener("click", () => {
+      playCyberSound("click");
+      const collapsed = sidebar.classList.toggle("collapsed");
+      if (toggleIcon) {
+        toggleIcon.innerHTML = collapsed ? "&#x25BA;" : "&#x25C4;";
+      }
+      localStorage.setItem("aegis_sidebar_collapsed", collapsed);
+    });
+  }
+
+  // Mobile hamburger menu toggle
+  if (mobileBtn && sidebar) {
+    mobileBtn.addEventListener("click", () => {
+      playCyberSound("click");
+      const isOpen = sidebar.classList.toggle("mobile-open");
+      if (backdrop) {
+        backdrop.classList.toggle("active", isOpen);
+      }
+    });
+  }
+
+  // Backdrop click to close mobile drawer
+  if (backdrop && sidebar) {
+    backdrop.addEventListener("click", () => {
+      sidebar.classList.remove("mobile-open");
+      backdrop.classList.remove("active");
+    });
+  }
+
+  // Header quick benchmark button
+  if (headerBenchmark) {
+    headerBenchmark.addEventListener("click", runFullDiagnosticBenchmark);
+  }
 }
 
 function switchTab(tabId) {
