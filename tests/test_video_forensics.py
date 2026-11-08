@@ -43,3 +43,27 @@ def test_analyze_video_pipeline():
     assert "visualizations" in results
     assert "keyframe_thumbnail" in results["visualizations"]
     assert "metrics" in results
+
+def test_analyze_video_empty_and_corrupt():
+    # Empty bytes
+    res_empty = analyze_video(b"")
+    assert res_empty["verdict"] == "EMPTY_MEDIA_ASSET"
+    assert res_empty["metrics"]["frames_analyzed"] == 0
+
+    # Corrupt / random bytes
+    res_corrupt = analyze_video(b"not a real video file random bytes 1234567890", filename="broken.mp4")
+    assert res_corrupt["verdict"] == "UNRECOGNIZED_MEDIA_STREAM"
+    assert res_corrupt["metrics"]["frames_analyzed"] == 0
+    assert len(res_corrupt["forensic_reasons"]) > 0
+
+def test_analyze_video_static_image_upload():
+    # Single static PNG image dragged into video analyzer
+    img = Image.new("RGB", (64, 64), color=(200, 100, 50))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    png_bytes = buf.getvalue()
+
+    res = analyze_video(png_bytes, filename="dragged_image.png")
+    assert res["verdict"] in ["AUTHENTIC_RECORDING", "SUSPICIOUS_TEMPORAL_ANOMALY", "LIKELY_DEEPFAKE_VIDEO"]
+    assert res["metrics"]["frames_analyzed"] == 1
+    assert "Single static frame" in res["forensic_reasons"][0]

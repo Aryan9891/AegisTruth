@@ -2,6 +2,8 @@
 
 import io
 import os
+import shutil
+import subprocess
 import tempfile
 import base64
 from typing import Dict, Any, List, Optional
@@ -28,6 +30,9 @@ def extract_video_frames(
     Supports ALL animated and video formats (MP4, MKV, AVI, MOV, WebM, FLV, WMV, GIF, WebP, APNG, etc.).
     Gracefully handles single-frame media and static images.
     """
+    if not video_bytes or len(video_bytes) == 0:
+        return []
+
     single_frame = None
 
     # 1. First attempt: PIL ImageSequence (handles animated GIF, APNG, WebP, multi-page TIFF, or static images)
@@ -50,10 +55,62 @@ def extract_video_frames(
     suffix = ".mp4"
     if filename:
         ext = os.path.splitext(filename)[1].lower()
-        if ext in (".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".gif", ".m4v", ".ts"):
+        if ext in (".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".gif", ".m4v", ".3gp", ".ts", ".ogv", ".mpg", ".mpeg"):
             suffix = ext
 
-    # 2. Second attempt: imageio_ffmpeg direct demuxer (industry standard, native ffmpeg binary)
+    # 2. Second attempt: Direct native FFmpeg CLI extraction (universal, supports any video/audio/container)
+    if HAS_FFMPEG:
+        tmp_path = None
+        tmp_dir = None
+        try:
+            ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                tmp.write(video_bytes)
+                tmp_path = tmp.name
+
+            tmp_dir = tempfile.mkdtemp(prefix="aegis_frames_")
+            out_pattern = os.path.join(tmp_dir, "frame_%04d.png")
+            cmd = [
+                ffmpeg_exe,
+                "-y",
+                "-err_detect", "ignore_err",
+                "-i", tmp_path,
+                "-vf", r"scale=min(640\,iw):-2",
+                "-vframes", str(max_frames),
+                out_pattern
+            ]
+            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+
+            frame_files = sorted([
+                os.path.join(tmp_dir, f)
+                for f in os.listdir(tmp_dir)
+                if f.startswith("frame_") and f.endswith(".png")
+            ])
+            if frame_files:
+                frames = []
+                for ff in frame_files:
+                    try:
+                        with Image.open(ff) as img:
+                            frames.append(np.array(img.convert("RGB")))
+                    except Exception:
+                        pass
+                if len(frames) >= 1:
+                    return frames
+        except Exception:
+            pass
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
+            if tmp_dir and os.path.exists(tmp_dir):
+                try:
+                    shutil.rmtree(tmp_dir, ignore_errors=True)
+                except Exception:
+                    pass
+
+    # 3. Third attempt: imageio_ffmpeg direct reader
     if HAS_FFMPEG:
         tmp_path = None
         try:
@@ -63,7 +120,7 @@ def extract_video_frames(
 
             reader = imageio_ffmpeg.read_frames(tmp_path, pix_fmt="rgb24")
             meta = next(reader)
-            w, h = meta.get("size", (0, 0))
+            w, h = meta.get("size") or meta.get("source_size") or (0, 0)
             frames = []
             for fb in reader:
                 if w > 0 and h > 0:
@@ -83,7 +140,7 @@ def extract_video_frames(
                 except Exception:
                     pass
 
-    # 3. Third attempt: imageio.v3 iterator directly on in-memory bytes
+    # 4. Fourth attempt: imageio.v3 iterator directly on in-memory bytes
     try:
         frames = []
         for idx, frame in enumerate(iio.imiter(io.BytesIO(video_bytes))):
@@ -99,7 +156,7 @@ def extract_video_frames(
     except Exception:
         pass
 
-    # 4. Fourth attempt: temporary file with imageio.v3 imiter
+    # 5. Fifth attempt: temporary file with imageio.v3 imiter
     tmp_path = None
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -126,14 +183,18 @@ def extract_video_frames(
             except Exception:
                 pass
 
-    # 5. Fallback: If user uploaded a single static image into the video sentinel, evaluate the single frame
+    # 6. Fallback: If user uploaded a single static image into the video sentinel, evaluate the single frame
     if single_frame is not None:
         return [single_frame]
 
-    raise ValueError(
-        "Could not extract frames from video asset: unsupported video codec or corrupted media file. "
-        "Please ensure the file is an active video (MP4, MKV, AVI, MOV, WebM) or animated sequence (GIF)."
-    )
+    # 7. Final fallback: try raw image decode one more time
+    try:
+        im = Image.open(io.BytesIO(video_bytes))
+        return [np.array(im.convert("RGB"))]
+    except Exception:
+        pass
+
+    return []
 
 
 def compute_temporal_consistency(frames: List[np.ndarray]) -> Dict[str, Any]:
@@ -222,8 +283,64 @@ def analyze_video(video_bytes: bytes, filename: Optional[str] = None) -> Dict[st
     """
     Complete video deepfake forensic pipeline.
     Combines temporal frame consistency with spatial Fourier inspection on keyframes.
+    Gracefully handles empty, corrupted, or unsupported media formats.
     """
-    frames = extract_video_frames(video_bytes, filename=filename)
+    if not video_bytes or len(video_bytes) == 0:
+        return {
+            "verdict": "EMPTY_MEDIA_ASSET",
+            "synthetic_probability": 0.0,
+            "confidence_description": "Uploaded video file is empty (0 bytes received).",
+            "forensic_reasons": ["The media file contains no byte data to evaluate."],
+            "visualizations": {
+                "keyframe_thumbnail": "",
+                "timeline_diffs": [0.0]
+            },
+            "metrics": {
+                "frames_analyzed": 0,
+                "temporal_flicker_score": 0.0,
+                "discontinuity_spikes_count": 0,
+                "keyframe_grid_spike_ratio": 0.0,
+                "keyframe_ela_variance": 0.0
+            }
+        }
+
+    try:
+        frames = extract_video_frames(video_bytes, filename=filename)
+    except Exception:
+        frames = []
+
+    if len(frames) == 0:
+        # Create an informative diagnostic keyframe thumbnail
+        diag_thumb = ""
+        try:
+            diag_img = Image.new("RGB", (240, 135), color=(15, 23, 42))
+            buffered = io.BytesIO()
+            diag_img.save(buffered, format="JPEG", quality=80)
+            diag_thumb = f"data:image/jpeg;base64,{base64.b64encode(buffered.getvalue()).decode('utf-8')}"
+        except Exception:
+            pass
+
+        return {
+            "verdict": "UNRECOGNIZED_MEDIA_STREAM",
+            "synthetic_probability": 0.0,
+            "confidence_description": "Video stream could not be extracted: media file is corrupted, incomplete, or contains no decodable frames.",
+            "forensic_reasons": [
+                "Media container does not contain decodable video packets or valid keyframes.",
+                "Please verify that the file is an active video (MP4, MKV, AVI, MOV, WebM) or animated sequence (GIF)."
+            ],
+            "visualizations": {
+                "keyframe_thumbnail": diag_thumb,
+                "timeline_diffs": [0.0]
+            },
+            "metrics": {
+                "frames_analyzed": 0,
+                "temporal_flicker_score": 0.0,
+                "discontinuity_spikes_count": 0,
+                "keyframe_grid_spike_ratio": 0.0,
+                "keyframe_ela_variance": 0.0
+            }
+        }
+
     temporal = compute_temporal_consistency(frames)
     
     # Inspect middle keyframe for spatial generative upsampling artifacts

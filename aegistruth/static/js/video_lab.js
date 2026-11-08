@@ -46,8 +46,14 @@ async function loadSampleVideo(filename) {
   setLoadingState("video-loading", true);
   if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
-    const directSample = await fetch(`/static/samples/${filename}`);
-    if (!directSample.ok) throw new Error("Could not fetch sample video asset");
+    let directSample = await fetch(`/static/samples/${filename}`).catch(() => null);
+    if (!directSample || !directSample.ok) {
+      directSample = await fetch(`samples/${filename}`).catch(() => null);
+    }
+    if (!directSample || !directSample.ok) {
+      directSample = await fetch(`./samples/${filename}`).catch(() => null);
+    }
+    if (!directSample || !directSample.ok) throw new Error("Could not fetch sample video asset");
     
     const blob = await directSample.blob();
     const fData = new FormData();
@@ -59,15 +65,15 @@ async function loadSampleVideo(filename) {
     });
 
     if (!res.ok) {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({ detail: "Video analysis failed" }));
       throw new Error(err.detail || "Video analysis failed");
     }
 
     const data = await res.json();
     renderVideoResults(data);
   } catch (err) {
-    if (typeof showToast === "function") showToast("Video sample error: " + err.message, "alert");
-    else alert("Video sample error: " + err.message);
+    if (typeof showToast === "function") showToast("Video sample notice: " + err.message, "alert");
+    console.error("Video sample error:", err);
   } finally {
     setLoadingState("video-loading", false);
   }
@@ -75,7 +81,6 @@ async function loadSampleVideo(filename) {
 
 function createDummyVideoBlob(frames) {
   const fData = new FormData();
-  // Simple binary payload
   const blob = new Blob(["GIF89a..."], { type: "image/gif" });
   fData.append("file", blob, "sample.gif");
   return fData;
@@ -94,15 +99,15 @@ async function processVideoFile(file) {
     });
 
     if (!res.ok) {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({ detail: "Video analysis failed" }));
       throw new Error(err.detail || "Video analysis failed");
     }
 
     const data = await res.json();
     renderVideoResults(data);
   } catch (err) {
-    if (typeof showToast === "function") showToast("Video analysis error: " + err.message, "alert");
-    else alert("Video analysis error: " + err.message);
+    if (typeof showToast === "function") showToast("Video analysis notice: " + err.message, "alert");
+    console.error("Video analysis error:", err);
   } finally {
     setLoadingState("video-loading", false);
   }
@@ -115,14 +120,17 @@ function renderVideoResults(data) {
   if (data.verdict === "AUTHENTIC_RECORDING") {
     if (typeof playCyberSound === "function") playCyberSound("success");
     if (typeof showToast === "function") showToast("Video verified: Continuous Optical Capture", "success");
+  } else if (data.verdict === "LIKELY_DEEPFAKE_VIDEO") {
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast(`Temporal Deepfake Risk Detected: ${data.synthetic_probability}%`, "alert");
   } else {
     if (typeof playCyberSound === "function") playCyberSound("alert");
-    if (typeof showToast === "function") showToast(`Temporal Deepfake Risk Detected: ${data.verdict}`, "alert");
+    if (typeof showToast === "function") showToast(`Temporal Sentinel Analysis: ${data.verdict}`, "info");
   }
 
   // Update dynamic radar state
   if (window.radarScores) {
-    window.radarScores.video = Math.max(5, Math.round(100 - data.synthetic_probability));
+    window.radarScores.video = Math.max(5, Math.round(100 - (data.synthetic_probability || 0)));
   }
 
   // Score & Verdict
@@ -134,26 +142,33 @@ function renderVideoResults(data) {
   } else if (data.verdict === "SUSPICIOUS_TEMPORAL_ANOMALY") {
     verdictEl.classList.add("badge-suspicious");
     verdictEl.innerHTML = `&#x26A0; ${data.verdict} (${data.synthetic_probability}% DEEPFAKE RISK)`;
-  } else {
+  } else if (data.verdict === "LIKELY_DEEPFAKE_VIDEO") {
     verdictEl.classList.add("badge-synthetic");
     verdictEl.innerHTML = `&#x2716; ${data.verdict} (${data.synthetic_probability}% DEEPFAKE RISK)`;
+  } else {
+    verdictEl.classList.add("badge-suspicious");
+    verdictEl.innerHTML = `&#x26A0; ${data.verdict}`;
   }
 
-  document.getElementById("video-verdict-desc").textContent = data.confidence_description;
+  document.getElementById("video-verdict-desc").textContent = data.confidence_description || "";
 
   // Keyframe
-  if (data.visualizations.keyframe_thumbnail) {
+  if (data.visualizations && data.visualizations.keyframe_thumbnail) {
     document.getElementById("video-keyframe-img").src = data.visualizations.keyframe_thumbnail;
   }
 
   // Metrics
-  document.getElementById("metric-video-frames").textContent = data.metrics.frames_analyzed;
-  document.getElementById("metric-video-flicker").textContent = data.metrics.temporal_flicker_score;
-  document.getElementById("metric-video-spikes").textContent = data.metrics.discontinuity_spikes_count;
-  document.getElementById("metric-video-grid").textContent = data.metrics.keyframe_grid_spike_ratio;
+  if (data.metrics) {
+    document.getElementById("metric-video-frames").textContent = data.metrics.frames_analyzed ?? 0;
+    document.getElementById("metric-video-flicker").textContent = data.metrics.temporal_flicker_score ?? 0;
+    document.getElementById("metric-video-spikes").textContent = data.metrics.discontinuity_spikes_count ?? 0;
+    document.getElementById("metric-video-grid").textContent = data.metrics.keyframe_grid_spike_ratio ?? 0;
+  }
 
   // Render Frame-by-Frame Optical Difference Chart
-  drawTimelineChart(data.visualizations.timeline_diffs);
+  if (data.visualizations && data.visualizations.timeline_diffs) {
+    drawTimelineChart(data.visualizations.timeline_diffs);
+  }
 
   // Evidentiary Reasons
   const reasonsList = document.getElementById("video-reasons-list");
