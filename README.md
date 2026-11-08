@@ -3,7 +3,7 @@
 [![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.162.2-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
 [![SciPy](https://img.shields.io/badge/SciPy-Signal%20Processing-0054A6.svg?logo=scipy)](https://scipy.org)
-[![Tests](https://img.shields.io/badge/Tests-30%20Passed%20(100%25)-success.svg)](https://pytest.org)
+[![Tests](https://img.shields.io/badge/Tests-48%20Passed%20(100%25)-success.svg)](https://pytest.org)
 [![Security Standard](https://img.shields.io/badge/C2PA-Compatible%20Provenance-6366f1.svg)](https://c2pa.org)
 
 > **The definitive open-source cognitive defense platform for verifying the authenticity of AI-generated images, cloned voices, synthetic text, hallucinated facts, and adversarial agent prompts.**
@@ -186,15 +186,18 @@ pytest -v
 
 **Results:**
 ```
-tests/test_agent_guard.py ........... PASSED [ 16%]
-tests/test_api.py ................... PASSED [ 36%]
-tests/test_audio_forensics.py ....... PASSED [ 50%]
-tests/test_fact_checker.py .......... PASSED [ 63%]
-tests/test_image_forensics.py ....... PASSED [ 76%]
-tests/test_provenance.py ............ PASSED [ 86%]
-tests/test_text_forensics.py ........ PASSED [100%]
+tests/test_agent_guard.py ........... PASSED [ 10%]
+tests/test_agent_proxy.py ........... PASSED [ 19%]
+tests/test_api.py ................... PASSED [ 37%]
+tests/test_audio_forensics.py ....... PASSED [ 45%]
+tests/test_client.py ................ PASSED [ 62%]
+tests/test_fact_checker.py .......... PASSED [ 70%]
+tests/test_image_forensics.py ....... PASSED [ 79%]
+tests/test_provenance.py ............ PASSED [ 85%]
+tests/test_text_forensics.py ........ PASSED [ 93%]
+tests/test_video_forensics.py ....... PASSED [100%]
 
-======================== 30 passed in 2.15s ========================
+======================== 48 passed in 3.39s ========================
 ```
 
 ---
