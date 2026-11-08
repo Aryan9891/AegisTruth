@@ -4,18 +4,33 @@ import io
 import os
 import tempfile
 import base64
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Optional
 import numpy as np
 from PIL import Image
 import imageio.v3 as iio
+
+try:
+    import imageio_ffmpeg
+    HAS_FFMPEG = True
+except ImportError:
+    HAS_FFMPEG = False
+
 from aegistruth.core.image_forensics import compute_fft_spectrum, compute_ela
 
-def extract_video_frames(video_bytes: bytes, max_frames: int = 30) -> List[np.ndarray]:
+
+def extract_video_frames(
+    video_bytes: bytes,
+    max_frames: int = 30,
+    filename: Optional[str] = None
+) -> List[np.ndarray]:
     """
-    Decodes video/animated media bytes into a list of RGB numpy frames.
-    Supports ALL animated and video formats (GIF, WebP, APNG, MP4, MKV, AVI, MOV, WebM, FLV, WMV, etc.).
+    Decodes video or animated media bytes into a list of RGB numpy frames.
+    Supports ALL animated and video formats (MP4, MKV, AVI, MOV, WebM, FLV, WMV, GIF, WebP, APNG, etc.).
+    Gracefully handles single-frame media and static images.
     """
-    # 1. First attempt: PIL ImageSequence (handles animated GIF, APNG, WebP, multi-page TIFF)
+    single_frame = None
+
+    # 1. First attempt: PIL ImageSequence (handles animated GIF, APNG, WebP, multi-page TIFF, or static images)
     try:
         im = Image.open(io.BytesIO(video_bytes))
         n_frames = getattr(im, "n_frames", 1)
@@ -24,11 +39,51 @@ def extract_video_frames(video_bytes: bytes, max_frames: int = 30) -> List[np.nd
             for frame_idx in range(min(n_frames, max_frames)):
                 im.seek(frame_idx)
                 frames.append(np.array(im.convert("RGB")))
-            return frames
+            if len(frames) >= 1:
+                return frames
+        else:
+            single_frame = np.array(im.convert("RGB"))
     except Exception:
         pass
 
-    # 2. Second attempt: imageio iterator directly on in-memory bytes
+    # Extract target file extension from filename for container demuxing
+    suffix = ".mp4"
+    if filename:
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in (".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".gif", ".m4v", ".ts"):
+            suffix = ext
+
+    # 2. Second attempt: imageio_ffmpeg direct demuxer (industry standard, native ffmpeg binary)
+    if HAS_FFMPEG:
+        tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+                tmp.write(video_bytes)
+                tmp_path = tmp.name
+
+            reader = imageio_ffmpeg.read_frames(tmp_path, pix_fmt="rgb24")
+            meta = next(reader)
+            w, h = meta.get("size", (0, 0))
+            frames = []
+            for fb in reader:
+                if w > 0 and h > 0:
+                    frame = np.frombuffer(fb, dtype=np.uint8).reshape((h, w, 3))
+                    frames.append(frame)
+                if len(frames) >= max_frames:
+                    break
+            reader.close()
+            if len(frames) >= 1:
+                return frames
+        except Exception:
+            pass
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except Exception:
+                    pass
+
+    # 3. Third attempt: imageio.v3 iterator directly on in-memory bytes
     try:
         frames = []
         for idx, frame in enumerate(iio.imiter(io.BytesIO(video_bytes))):
@@ -39,15 +94,15 @@ def extract_video_frames(video_bytes: bytes, max_frames: int = 30) -> List[np.nd
             elif frame.shape[2] == 4:
                 frame = frame[:, :, :3]
             frames.append(frame)
-        if len(frames) >= 2:
+        if len(frames) >= 1:
             return frames
     except Exception:
         pass
 
-    # 3. Third attempt: write to temporary file to assist container demuxing for complex video formats
+    # 4. Fourth attempt: temporary file with imageio.v3 imiter
     tmp_path = None
     try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
             tmp.write(video_bytes)
             tmp_path = tmp.name
 
@@ -60,7 +115,7 @@ def extract_video_frames(video_bytes: bytes, max_frames: int = 30) -> List[np.nd
             elif frame.shape[2] == 4:
                 frame = frame[:, :, :3]
             frames.append(frame)
-        if len(frames) >= 2:
+        if len(frames) >= 1:
             return frames
     except Exception:
         pass
@@ -71,7 +126,15 @@ def extract_video_frames(video_bytes: bytes, max_frames: int = 30) -> List[np.nd
             except Exception:
                 pass
 
-    raise ValueError("Could not extract frames from video asset (unsupported format or file contains only a single static frame)")
+    # 5. Fallback: If user uploaded a single static image into the video sentinel, evaluate the single frame
+    if single_frame is not None:
+        return [single_frame]
+
+    raise ValueError(
+        "Could not extract frames from video asset: unsupported video codec or corrupted media file. "
+        "Please ensure the file is an active video (MP4, MKV, AVI, MOV, WebM) or animated sequence (GIF)."
+    )
+
 
 def compute_temporal_consistency(frames: List[np.ndarray]) -> Dict[str, Any]:
     """
@@ -81,8 +144,25 @@ def compute_temporal_consistency(frames: List[np.ndarray]) -> Dict[str, Any]:
     - Unnatural jumps in frame-to-frame high-frequency Laplacian variance.
     - Splicing discontinuities between consecutive frames.
     """
-    if len(frames) < 2:
-        raise ValueError("Video must contain at least 2 frames for temporal analysis")
+    if len(frames) == 0:
+        raise ValueError("Video contains no frames to analyze")
+
+    # Gracefully handle single frame (e.g. single static image uploaded)
+    if len(frames) == 1:
+        mid_frame = Image.fromarray(frames[0])
+        buffered = io.BytesIO()
+        mid_frame.save(buffered, format="JPEG", quality=85)
+        keyframe_b64 = f"data:image/jpeg;base64,{base64.b64encode(buffered.getvalue()).decode('utf-8')}"
+        return {
+            "total_frames_analyzed": 1,
+            "mean_frame_diff": 0.0,
+            "diff_std": 0.0,
+            "motion_jitter_cv": 0.0,
+            "temporal_flicker_score": 0.0,
+            "discontinuity_spikes": [],
+            "timeline_diffs": [0.0],
+            "keyframe_thumbnail": keyframe_b64
+        }
 
     frame_diffs = []
     laplacian_variances = []
@@ -137,12 +217,13 @@ def compute_temporal_consistency(frames: List[np.ndarray]) -> Dict[str, Any]:
         "keyframe_thumbnail": keyframe_b64
     }
 
-def analyze_video(video_bytes: bytes) -> Dict[str, Any]:
+
+def analyze_video(video_bytes: bytes, filename: Optional[str] = None) -> Dict[str, Any]:
     """
     Complete video deepfake forensic pipeline.
     Combines temporal frame consistency with spatial Fourier inspection on keyframes.
     """
-    frames = extract_video_frames(video_bytes)
+    frames = extract_video_frames(video_bytes, filename=filename)
     temporal = compute_temporal_consistency(frames)
     
     # Inspect middle keyframe for spatial generative upsampling artifacts
@@ -154,28 +235,34 @@ def analyze_video(video_bytes: bytes) -> Dict[str, Any]:
     ai_score = 0.0
     forensic_reasons = []
 
-    # 1. Temporal flicker anomaly
-    if temporal["temporal_flicker_score"] > 1.2:
-        ai_score += 35.0
-        forensic_reasons.append(f"High inter-frame edge flicker ({temporal['temporal_flicker_score']:.2f}), characteristic of facial boundary warps in deepfake synthesis.")
-    elif temporal["temporal_flicker_score"] > 0.5:
-        ai_score += 15.0
-        forensic_reasons.append(f"Moderate edge flickering detected across frames ({temporal['temporal_flicker_score']:.2f}).")
+    if temporal["total_frames_analyzed"] == 1:
+        forensic_reasons.append("Single static frame evaluated in temporal sentinel: no inter-frame motion detected.")
+    else:
+        # 1. Temporal flicker anomaly
+        if temporal["temporal_flicker_score"] > 1.2:
+            ai_score += 35.0
+            forensic_reasons.append(f"High inter-frame edge flicker ({temporal['temporal_flicker_score']:.2f}), characteristic of facial boundary warps in deepfake synthesis.")
+        elif temporal["temporal_flicker_score"] > 0.5:
+            ai_score += 15.0
+            forensic_reasons.append(f"Moderate edge flickering detected across frames ({temporal['temporal_flicker_score']:.2f}).")
 
-    # 2. Motion jitter coefficient of variation
-    if temporal["motion_jitter_cv"] > 0.20:
-        ai_score += 25.0
-        forensic_reasons.append(f"Erratic frame-to-frame optical flow variance (jitter CV: {temporal['motion_jitter_cv']:.2f}), typical of deepfake frame interpolation.")
+        # 2. Motion jitter coefficient of variation
+        if temporal["motion_jitter_cv"] > 0.20:
+            ai_score += 25.0
+            forensic_reasons.append(f"Erratic frame-to-frame optical flow variance (jitter CV: {temporal['motion_jitter_cv']:.2f}), typical of deepfake frame interpolation.")
 
-    # 3. Splicing discontinuity spikes
-    if len(temporal["discontinuity_spikes"]) >= 1:
-        ai_score += 20.0
-        forensic_reasons.append(f"Temporal discontinuity spikes detected ({len(temporal['discontinuity_spikes'])} anomalous transitions).")
+        # 3. Splicing discontinuity spikes
+        if len(temporal["discontinuity_spikes"]) >= 1:
+            ai_score += 20.0
+            forensic_reasons.append(f"Temporal discontinuity spikes detected ({len(temporal['discontinuity_spikes'])} anomalous transitions).")
 
     # 4. Spatial keyframe frequency artifacts
     if grid_spike_ratio > 3.5:
         ai_score += 20.0
         forensic_reasons.append(f"Keyframes exhibit periodic 2D Fourier grid upsampling harmonics (ratio: {grid_spike_ratio:.2f}).")
+    elif grid_spike_ratio > 2.0:
+        ai_score += 10.0
+        forensic_reasons.append(f"Moderate spatial Fourier frequency anomalies detected in keyframe lattice ({grid_spike_ratio:.2f}).")
         
     ai_score = float(np.clip(ai_score, 0.0, 100.0))
 

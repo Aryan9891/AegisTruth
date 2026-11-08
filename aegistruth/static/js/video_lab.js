@@ -66,7 +66,8 @@ async function loadSampleVideo(filename) {
     const data = await res.json();
     renderVideoResults(data);
   } catch (err) {
-    alert("Video sample error: " + err.message);
+    if (typeof showToast === "function") showToast("Video sample error: " + err.message, "alert");
+    else alert("Video sample error: " + err.message);
   } finally {
     setLoadingState("video-loading", false);
   }
@@ -100,7 +101,8 @@ async function processVideoFile(file) {
     const data = await res.json();
     renderVideoResults(data);
   } catch (err) {
-    alert("Video analysis error: " + err.message);
+    if (typeof showToast === "function") showToast("Video analysis error: " + err.message, "alert");
+    else alert("Video analysis error: " + err.message);
   } finally {
     setLoadingState("video-loading", false);
   }

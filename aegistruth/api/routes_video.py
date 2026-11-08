@@ -17,7 +17,7 @@ async def forensic_video_upload(file: UploadFile = File(...)):
         if len(content) == 0:
             raise HTTPException(status_code=400, detail="Empty video file uploaded")
 
-        results = analyze_video(content)
+        results = analyze_video(content, filename=file.filename)
         manifest = generate_provenance_manifest("video", content, results)
         results["provenance_manifest"] = manifest
         return results
