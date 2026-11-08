@@ -7,7 +7,7 @@ Includes synthetic benchmark simulation to scale training up to 1,000,000+ multi
 import argparse
 import time
 from pathlib import Path
-from typing import Tuple
+from typing import Dict, Any, Tuple
 import numpy as np
 from aegistruth.core.ml_classifier import (
     CalibratedForensicClassifier,
