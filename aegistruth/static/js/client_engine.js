@@ -183,6 +183,21 @@
       });
     }
 
+    if (endpoint === "/api/report/download-extension") {
+      try {
+        const res = await nativeFetch("downloads/aegistruth-browser-extension.zip");
+        if (res.ok) return res;
+      } catch (_) {}
+      const zipBlob = clientBuildExtensionZipBlob();
+      return new Response(zipBlob, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/zip",
+          "Content-Disposition": "attachment; filename=aegistruth-browser-extension.zip"
+        }
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Endpoint handled in Web Mode", endpoint }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
@@ -750,7 +765,279 @@
 </html>`;
   }
 
+  // --- 8. Pure JavaScript PKZIP Builder for Client-Side Extension Packaging ---
+  function clientBuildExtensionZipBlob() {
+    const files = {
+      "manifest.json": JSON.stringify({
+        manifest_version: 3,
+        name: "AegisTruth Cognitive Sentinel",
+        version: "1.0.0",
+        description: "Real-time deepfake, voice clone, and AI misinformation verification in your browser.",
+        permissions: ["activeTab", "scripting"],
+        host_permissions: ["http://127.0.0.1:8000/*", "http://localhost:8000/*"],
+        action: {
+          default_popup: "popup.html",
+          default_title: "AegisTruth Sentinel"
+        },
+        content_scripts: [
+          {
+            matches: ["<all_urls>"],
+            js: ["content.js"]
+          }
+        ]
+      }, null, 2),
+      "popup.html": `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AegisTruth Sentinel</title>
+  <style>
+    body { width: 340px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b0f19; color: #f3f4f6; padding: 16px; margin: 0; }
+    h3 { font-size: 16px; color: #38bdf8; margin: 0 0 10px 0; display: flex; align-items: center; gap: 8px; }
+    textarea { width: 100%; box-sizing: border-box; background: #1e293b; color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px; font-size: 13px; resize: vertical; }
+    button { width: 100%; margin-top: 10px; background: #0284c7; color: white; border: none; padding: 9px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #0369a1; }
+    #result { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 12px; display: none; line-height: 1.5; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; margin-bottom: 6px; }
+    .authentic { background: rgba(16,185,129,0.2); color: #10b981; }
+    .synthetic { background: rgba(244,63,94,0.2); color: #f43f5e; }
+  </style>
+</head>
+<body>
+  <h3>&#x1F6E1; AegisTruth Sentinel</h3>
+  <textarea id="text-input" rows="4" placeholder="Paste article snippet, claim, or prompt to verify..."></textarea>
+  <button id="verify-btn">&#x1F9E0; Verify Content Authenticity</button>
+  
+  <div id="result">
+    <div id="verdict-badge" class="badge"></div>
+    <div id="details"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>`,
+      "popup.js": `document.addEventListener("DOMContentLoaded", () => {
+  const verifyBtn = document.getElementById("verify-btn");
+  const textInput = document.getElementById("text-input");
+  const resultDiv = document.getElementById("result");
+  const badge = document.getElementById("verdict-badge");
+  const details = document.getElementById("details");
+
+  verifyBtn.addEventListener("click", async () => {
+    const text = textInput.value.trim();
+    if (!text) return;
+
+    verifyBtn.textContent = "Analyzing...";
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/forensics/text", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text })
+      });
+
+      if (!res.ok) throw new Error("Could not connect to AegisTruth local server.");
+      const data = await res.json();
+
+      resultDiv.style.display = "block";
+      const isSynthetic = data.synthetic_probability > 50;
+      badge.className = "badge " + (isSynthetic ? "synthetic" : "authentic");
+      badge.textContent = \`\${data.verdict} (\${data.synthetic_probability}% AI)\`;
+
+      details.innerHTML = \`
+        <strong>Burstiness:</strong> \${data.metrics.burstiness_index} | <strong>Entropy:</strong> \${data.metrics.shannon_entropy} bits<br>
+        <span style="color: #94a3b8;">\${data.confidence_description}</span>
+      \`;
+    } catch (err) {
+      resultDiv.style.display = "block";
+      badge.className = "badge synthetic";
+      badge.textContent = "CONNECTION ERROR";
+      details.textContent = "Make sure AegisTruth local server is running at http://127.0.0.1:8000 (run: python run_server.py)";
+    } finally {
+      verifyBtn.textContent = "Verify Content Authenticity";
+    }
+  });
+});`,
+      "content.js": `// AegisTruth Browser Content Script
+// Adds quick verification tooltips to selected text
+
+document.addEventListener("mouseup", () => {
+  const selection = window.getSelection().toString().trim();
+  if (selection.length > 30 && selection.length < 1000) {
+    let icon = document.getElementById("aegistruth-floating-icon");
+    if (!icon) {
+      icon = document.createElement("div");
+      icon.id = "aegistruth-floating-icon";
+      icon.innerHTML = "&#x1F6E1;";
+      icon.title = "Verify selected text with AegisTruth";
+      icon.style.cssText = "position: absolute; z-index: 999999; cursor: pointer; background: #0f172a; border: 1px solid #38bdf8; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);";
+      document.body.appendChild(icon);
+
+      icon.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        icon.innerHTML = "&#x23F3;";
+        try {
+          const res = await fetch("http://127.0.0.1:8000/api/forensics/text", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: selection })
+          });
+          const data = await res.json();
+          alert(\`[AegisTruth Sentinel]\\nVerdict: \${data.verdict}\\nAI Probability: \${data.synthetic_probability}%\\nBurstiness: \${data.metrics.burstiness_index}\\nDescription: \${data.confidence_description}\`);
+        } catch (err) {
+          alert("AegisTruth server not detected at http://127.0.0.1:8000. Start it via 'python run_server.py'");
+        } finally {
+          icon.innerHTML = "&#x1F6E1;";
+        }
+      });
+    }
+
+    const oRect = window.getSelection().getRangeAt(0).getBoundingClientRect();
+    icon.style.top = \`\${window.scrollY + oRect.top - 34}px\`;
+    icon.style.left = \`\${window.scrollX + oRect.right - 10}px\`;
+    icon.style.display = "flex";
+  } else {
+    const icon = document.getElementById("aegistruth-floating-icon");
+    if (icon) icon.style.display = "none";
+  }
+});`
+    };
+
+    // Precomputed CRC32 table
+    const crcTable = [];
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) {
+        c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      }
+      crcTable[n] = c;
+    }
+
+    function calcCrc32(bytes) {
+      let crc = 0 ^ (-1);
+      for (let i = 0; i < bytes.length; i++) {
+        crc = (crc >>> 8) ^ crcTable[(crc ^ bytes[i]) & 0xff];
+      }
+      return (crc ^ (-1)) >>> 0;
+    }
+
+    const enc = new TextEncoder();
+    const parts = [];
+    const cdEntries = [];
+    let offset = 0;
+
+    for (const [name, text] of Object.entries(files)) {
+      const nameBytes = enc.encode(name);
+      const dataBytes = enc.encode(text);
+      const crc = calcCrc32(dataBytes);
+      const size = dataBytes.length;
+
+      // Local Header (30 bytes)
+      const lh = new Uint8Array(30);
+      const lv = new DataView(lh.buffer);
+      lv.setUint32(0, 0x04034b50, true);
+      lv.setUint16(4, 20, true);
+      lv.setUint16(6, 0, true);
+      lv.setUint16(8, 0, true); // stored uncompressed
+      lv.setUint16(10, 0, true);
+      lv.setUint16(12, 0, true);
+      lv.setUint32(14, crc, true);
+      lv.setUint32(18, size, true);
+      lv.setUint32(22, size, true);
+      lv.setUint16(26, nameBytes.length, true);
+      lv.setUint16(28, 0, true);
+
+      parts.push(lh, nameBytes, dataBytes);
+
+      // Central Directory Header (46 bytes)
+      const ch = new Uint8Array(46);
+      const cv = new DataView(ch.buffer);
+      cv.setUint32(0, 0x02014b50, true);
+      cv.setUint16(4, 20, true);
+      cv.setUint16(6, 20, true);
+      cv.setUint16(8, 0, true);
+      cv.setUint16(10, 0, true);
+      cv.setUint16(12, 0, true);
+      cv.setUint16(14, 0, true);
+      cv.setUint32(16, crc, true);
+      cv.setUint32(20, size, true);
+      cv.setUint32(24, size, true);
+      cv.setUint16(28, nameBytes.length, true);
+      cv.setUint16(30, 0, true);
+      cv.setUint16(32, 0, true);
+      cv.setUint16(34, 0, true);
+      cv.setUint16(36, 0, true);
+      cv.setUint32(38, 0, true);
+      cv.setUint32(42, offset, true);
+
+      cdEntries.push(ch, nameBytes);
+
+      offset += lh.length + nameBytes.length + size;
+    }
+
+    const cdOffset = offset;
+    let cdSize = 0;
+    for (const p of cdEntries) cdSize += p.length;
+    const numEntries = Object.keys(files).length;
+
+    // End of Central Directory Record (22 bytes)
+    const eocd = new Uint8Array(22);
+    const ev = new DataView(eocd.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(4, 0, true);
+    ev.setUint16(6, 0, true);
+    ev.setUint16(8, numEntries, true);
+    ev.setUint16(10, numEntries, true);
+    ev.setUint32(12, cdSize, true);
+    ev.setUint32(16, cdOffset, true);
+    ev.setUint16(20, 0, true);
+
+    return new Blob([...parts, ...cdEntries, eocd], { type: "application/zip" });
+  }
+
+  function triggerDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 200);
+  }
+
+  // Hook extension download button for seamless experience in Web/GitHub Pages mode
+  document.addEventListener("DOMContentLoaded", () => {
+    const extBtn = document.getElementById("sidebar-download-extension-btn");
+    if (extBtn) {
+      extBtn.addEventListener("click", async (e) => {
+        if (!backendReachable) {
+          e.preventDefault();
+          if (typeof playCyberSound === "function") playCyberSound("click");
+          if (typeof showToast === "function") showToast("Downloading AegisTruth Chrome Extension (.zip)...", "info");
+
+          try {
+            const res = await nativeFetch("downloads/aegistruth-browser-extension.zip");
+            if (res.ok) {
+              const blob = await res.blob();
+              triggerDownload(blob, "aegistruth-browser-extension.zip");
+              if (typeof showToast === "function") showToast("Extension package downloaded successfully!", "success");
+              return;
+            }
+          } catch (_) {}
+
+          // Dynamic in-browser generation fallback
+          const zipBlob = clientBuildExtensionZipBlob();
+          triggerDownload(zipBlob, "aegistruth-browser-extension.zip");
+          if (typeof showToast === "function") showToast("Extension package generated and downloaded!", "success");
+        }
+      });
+    }
+  });
+
   // Export to window
+  window.clientBuildExtensionZipBlob = clientBuildExtensionZipBlob;
   window.aegisApiFetch = aegisApiFetch;
   window.getAssetUrl = getAssetUrl;
   window.probeBackend = probeBackend;

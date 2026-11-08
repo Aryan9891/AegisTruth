@@ -29,8 +29,9 @@ jobs:
 
       - name: Build Static Site Artifact
         run: |
-          mkdir -p _site
+          mkdir -p _site/downloads
           cp -r aegistruth/static/* _site/
+          python3 -c "import zipfile, os; z=zipfile.ZipFile('_site/downloads/aegistruth-browser-extension.zip','w',zipfile.ZIP_DEFLATED); [z.write(os.path.join(r,f), os.path.relpath(os.path.join(r,f), 'browser_extension')) for r,_,fs in os.walk('browser_extension') for f in fs]; z.close()"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -54,6 +54,9 @@ def create_app() -> FastAPI:
         samples_dir = STATIC_DIR / "samples"
         if samples_dir.exists():
             app.mount("/samples", StaticFiles(directory=str(samples_dir)), name="samples")
+        downloads_dir = STATIC_DIR / "downloads"
+        if downloads_dir.exists():
+            app.mount("/downloads", StaticFiles(directory=str(downloads_dir)), name="downloads")
 
         @app.get("/", include_in_schema=False)
         async def root():
