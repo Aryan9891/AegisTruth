@@ -103,8 +103,14 @@ async function loadSampleImage(filename) {
   setLoadingState("image-loading", true);
   if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
-    const directSample = await fetch(`/static/samples/${filename}`);
-    if (!directSample.ok) throw new Error("Could not fetch sample image asset");
+    let directSample = await fetch(`samples/${filename}`).catch(() => null);
+    if (!directSample || !directSample.ok) {
+      directSample = await fetch(`./samples/${filename}`).catch(() => null);
+    }
+    if (!directSample || !directSample.ok) {
+      directSample = await fetch(`/static/samples/${filename}`).catch(() => null);
+    }
+    if (!directSample || !directSample.ok) throw new Error("Could not fetch sample image asset");
 
     const blob = await directSample.blob();
     const formData = new FormData();

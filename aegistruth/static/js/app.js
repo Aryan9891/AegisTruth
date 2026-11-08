@@ -723,6 +723,14 @@ function initBenchmarkModal() {
   }
 }
 
+async function fetchSampleBlob(filename) {
+  let res = await fetch(`samples/${filename}`).catch(() => null);
+  if (!res || !res.ok) res = await fetch(`./samples/${filename}`).catch(() => null);
+  if (!res || !res.ok) res = await fetch(`/static/samples/${filename}`).catch(() => null);
+  if (!res || !res.ok) throw new Error("Could not load sample asset: " + filename);
+  return await res.blob();
+}
+
 async function runFullDiagnosticBenchmark() {
   const modal = document.getElementById("benchmark-modal");
   const logEl = document.getElementById("benchmark-log");
@@ -755,7 +763,7 @@ async function runFullDiagnosticBenchmark() {
     // Step 2: Visual 2D FFT & ELA Deepfake Benchmark
     progBar.style.width = "30%";
     li = appendLog("&#x23F3; [2/6] Executing Visual 2D FFT Lattice & ELA Analysis on synthetic asset...");
-    const imgBlob = await (await fetch("/static/samples/sample_synthetic.jpg")).blob();
+    const imgBlob = await fetchSampleBlob("sample_synthetic.jpg");
     const imgData = new FormData();
     imgData.append("file", imgBlob, "sample_synthetic.jpg");
     const imgRes = await fetch("/api/forensics/image", { method: "POST", body: imgData });
@@ -768,7 +776,7 @@ async function runFullDiagnosticBenchmark() {
     // Step 3: Video Temporal Motion Jitter & Laplacian Edge Flicker
     progBar.style.width = "50%";
     li = appendLog("&#x23F3; [3/6] Decoding Video Inter-frame Optical Flow & Edge Sharpness...");
-    const vidBlob = await (await fetch("/static/samples/sample_video_deepfake.gif")).blob();
+    const vidBlob = await fetchSampleBlob("sample_video_deepfake.gif");
     const vidData = new FormData();
     vidData.append("file", vidBlob, "sample_video_deepfake.gif");
     const vidRes = await fetch("/api/forensics/video", { method: "POST", body: vidData });
@@ -781,7 +789,7 @@ async function runFullDiagnosticBenchmark() {
     // Step 4: Acoustic Vocal Micro-Jitter & STFT Vocoder
     progBar.style.width = "70%";
     li = appendLog("&#x23F3; [4/6] Computing Vocal Cord Perturbation & Sub-sample Parabolic Jitter...");
-    const audBlob = await (await fetch("/static/samples/sample_audio_clone.wav")).blob();
+    const audBlob = await fetchSampleBlob("sample_audio_clone.wav");
     const audData = new FormData();
     audData.append("file", audBlob, "sample_audio_clone.wav");
     const audRes = await fetch("/api/forensics/audio", { method: "POST", body: audData });

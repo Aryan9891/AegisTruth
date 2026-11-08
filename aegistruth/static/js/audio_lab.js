@@ -158,8 +158,14 @@ function drawLiveMicWaveform(canvas, analyser) {
 async function loadSampleAudio(filename) {
   setLoadingState("audio-loading", true);
   try {
-    const directSample = await fetch(`/static/samples/${filename}`);
-    if (!directSample.ok) throw new Error("Could not fetch sample audio asset");
+    let directSample = await fetch(`samples/${filename}`).catch(() => null);
+    if (!directSample || !directSample.ok) {
+      directSample = await fetch(`./samples/${filename}`).catch(() => null);
+    }
+    if (!directSample || !directSample.ok) {
+      directSample = await fetch(`/static/samples/${filename}`).catch(() => null);
+    }
+    if (!directSample || !directSample.ok) throw new Error("Could not fetch sample audio asset");
 
     const blob = await directSample.blob();
     await processAudioFile(blob, filename);

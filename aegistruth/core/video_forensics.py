@@ -20,6 +20,46 @@ except ImportError:
 from aegistruth.core.image_forensics import compute_fft_spectrum, compute_ela
 
 
+def detect_video_container_suffix(video_bytes: bytes, filename: Optional[str] = None) -> str:
+    """Detects appropriate file suffix for video container from filename or magic bytes."""
+    if filename:
+        ext = os.path.splitext(filename)[1].lower()
+        if ext in (
+            ".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".gif",
+            ".m4v", ".3gp", ".ts", ".ogv", ".mpg", ".mpeg", ".mts", ".m2ts",
+            ".vob", ".asf", ".hevc", ".h264", ".h265", ".y4m", ".webp", ".apng"
+        ):
+            return ext
+
+    if video_bytes and len(video_bytes) >= 12:
+        # MP4 / QuickTime MOV / M4V / 3GP
+        if video_bytes[4:8] in (b"ftyp", b"moov", b"wide", b"free") or video_bytes[4:8].startswith(b"qt"):
+            return ".mp4"
+        # WebM or Matroska (EBML header: 0x1A 0x45 0xDF 0xA3)
+        if video_bytes[:4] == b"\x1a\x45\xdf\xa3":
+            return ".webm"
+        # RIFF AVI / WEBP
+        if video_bytes[:4] == b"RIFF":
+            if video_bytes[8:12] == b"AVI ":
+                return ".avi"
+            if video_bytes[8:12] == b"WEBP":
+                return ".webp"
+        # GIF
+        if video_bytes[:6] in (b"GIF87a", b"GIF89a"):
+            return ".gif"
+        # MPEG-TS
+        if video_bytes[0] == 0x47 and len(video_bytes) > 188 and video_bytes[188] == 0x47:
+            return ".ts"
+        # Windows Media Video / ASF
+        if video_bytes[:4] == b"\x30\x26\xb2\x75":
+            return ".wmv"
+        # FLV
+        if video_bytes[:3] == b"FLV":
+            return ".flv"
+
+    return ".mp4"
+
+
 def extract_video_frames(
     video_bytes: bytes,
     max_frames: int = 30,
@@ -51,12 +91,8 @@ def extract_video_frames(
     except Exception:
         pass
 
-    # Extract target file extension from filename for container demuxing
-    suffix = ".mp4"
-    if filename:
-        ext = os.path.splitext(filename)[1].lower()
-        if ext in (".mp4", ".mkv", ".avi", ".mov", ".webm", ".flv", ".wmv", ".gif", ".m4v", ".3gp", ".ts", ".ogv", ".mpg", ".mpeg"):
-            suffix = ext
+    # Extract target file extension from filename or container magic bytes
+    suffix = detect_video_container_suffix(video_bytes, filename)
 
     # 2. Second attempt: Direct native FFmpeg CLI extraction (universal, supports any video/audio/container)
     if HAS_FFMPEG:
@@ -70,12 +106,15 @@ def extract_video_frames(
 
             tmp_dir = tempfile.mkdtemp(prefix="aegis_frames_")
             out_pattern = os.path.join(tmp_dir, "frame_%04d.png")
+
+            # Try scaled extraction first for performance and memory
             cmd = [
                 ffmpeg_exe,
                 "-y",
                 "-err_detect", "ignore_err",
                 "-i", tmp_path,
                 "-vf", r"scale=min(640\,iw):-2",
+                "-pix_fmt", "rgb24",
                 "-vframes", str(max_frames),
                 out_pattern
             ]
@@ -86,6 +125,25 @@ def extract_video_frames(
                 for f in os.listdir(tmp_dir)
                 if f.startswith("frame_") and f.endswith(".png")
             ])
+
+            # If scaled extraction returned no frames, try raw unscaled extraction
+            if not frame_files:
+                cmd_raw = [
+                    ffmpeg_exe,
+                    "-y",
+                    "-err_detect", "ignore_err",
+                    "-i", tmp_path,
+                    "-pix_fmt", "rgb24",
+                    "-vframes", str(max_frames),
+                    out_pattern
+                ]
+                subprocess.run(cmd_raw, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+                frame_files = sorted([
+                    os.path.join(tmp_dir, f)
+                    for f in os.listdir(tmp_dir)
+                    if f.startswith("frame_") and f.endswith(".png")
+                ])
+
             if frame_files:
                 frames = []
                 for ff in frame_files:

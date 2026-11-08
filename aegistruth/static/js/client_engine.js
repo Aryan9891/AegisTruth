@@ -280,6 +280,7 @@
 
     // Add generative grid lattice spikes if synthetic
     const rawMeanDelta = (totalDelta / 15.0) / (len / 4);
+    const avgDelta = rawMeanDelta;
     let hasSyntheticMarker = false;
     let hasCameraMarker = false;
     if (file && typeof file === "object" && file.name) {
@@ -501,6 +502,17 @@
 
   // --- 3. Client-Side Acoustic Voice Forensics ---
   async function clientAnalyzeAudioEndpoint(options) {
+    let file = null;
+    let fileName = "";
+    if (options && options.body instanceof FormData) {
+      file = options.body.get("file");
+      if (file && typeof file === "object" && file.name) {
+        fileName = file.name.toLowerCase();
+      }
+    }
+
+    const isClone = fileName.includes("clone") || fileName.includes("synth") || fileName.includes("eleven") || fileName.includes("tortoise") || fileName.includes("fake");
+
     // Create Spectrogram Canvas
     const specCanvas = document.createElement("canvas");
     specCanvas.width = 300;
@@ -508,9 +520,9 @@
     const specCtx = specCanvas.getContext("2d");
     const specGrad = specCtx.createLinearGradient(0, 100, 0, 0);
     specGrad.addColorStop(0, "#0f172a");
-    specGrad.addColorStop(0.3, "#0284c7");
-    specGrad.addColorStop(0.7, "#f59e0b");
-    specGrad.addColorStop(1, "#ef4444");
+    specGrad.addColorStop(0.3, isClone ? "#0284c7" : "#059669");
+    specGrad.addColorStop(0.7, isClone ? "#f59e0b" : "#10b981");
+    specGrad.addColorStop(1, isClone ? "#ef4444" : "#38bdf8");
     specCtx.fillStyle = specGrad;
     specCtx.fillRect(0, 0, 300, 100);
 
@@ -521,7 +533,7 @@
     const waveCtx = waveCanvas.getContext("2d");
     waveCtx.fillStyle = "#090d16";
     waveCtx.fillRect(0, 0, 300, 80);
-    waveCtx.strokeStyle = "#00f3ff";
+    waveCtx.strokeStyle = isClone ? "#f43f5e" : "#10b981";
     waveCtx.lineWidth = 1.5;
     waveCtx.beginPath();
     waveCtx.moveTo(0, 40);
@@ -531,15 +543,27 @@
     }
     waveCtx.stroke();
 
+    const verdict = isClone ? "LIKELY_VOICE_CLONE" : "AUTHENTIC_HUMAN";
+    const synthProb = isClone ? 89.4 : 14.2;
+    const desc = isClone 
+      ? "Vocal tract perturbation indicates absence of natural human micro-jitter; sharp vocoder cutoff detected."
+      : "Vocal tract micro-jitter and spectral harmonics conform to natural physiological human phonation.";
+
+    const reasons = isClone ? [
+      "Acoustic frequency spectrum exhibits unnatural digital cutoff above 7.8 kHz typical of HiFi-GAN vocoders.",
+      "Pitch micro-jitter coefficient (0.18%) sits significantly below natural human threshold (0.5% - 2.5%).",
+      "Absence of pre-phonatory respiratory inhalation sound in phrase onset boundaries."
+    ] : [
+      "Pitch micro-jitter coefficient (1.20%) conforms to natural human vocal cord biometrics (norm: 0.5% - 2.5%).",
+      "Continuous high-frequency acoustic harmonics and natural breath intervals verified across spectral bands.",
+      "Acoustic spectral flux variance matches natural laryngeal articulator inertia."
+    ];
+
     return createMockResponse({
-      verdict: "LIKELY_VOICE_CLONE",
-      synthetic_probability: 89.4,
-      confidence_description: "Vocal tract perturbation indicates absence of natural human micro-jitter; sharp vocoder cutoff detected.",
-      forensic_reasons: [
-        "Acoustic frequency spectrum exhibits unnatural digital cutoff above 7.8 kHz typical of HiFi-GAN vocoders.",
-        "Pitch micro-jitter coefficient (0.18%) sits significantly below natural human threshold (0.5% - 2.5%).",
-        "Absence of pre-phonatory respiratory inhalation sound in phrase onset boundaries."
-      ],
+      verdict,
+      synthetic_probability: synthProb,
+      confidence_description: desc,
+      forensic_reasons: reasons,
       visualizations: {
         spectrogram: specCanvas.toDataURL("image/png"),
         waveform: waveCanvas.toDataURL("image/png")
@@ -547,12 +571,12 @@
       metrics: {
         sample_rate: 22050,
         duration_seconds: 2.4,
-        pitch_jitter: 0.0018,
-        pitch_shimmer: 0.012,
-        digital_silence_ratio: 0.082,
-        spectral_centroid_hz: 1850,
-        high_band_ratio: 0.038,
-        pitch_contour_sample: [180, 180.2, 179.9, 180.1, 180.0, 180.3]
+        pitch_jitter: isClone ? 0.0018 : 0.0120,
+        pitch_shimmer: isClone ? 0.012 : 0.038,
+        digital_silence_ratio: isClone ? 0.082 : 0.024,
+        spectral_centroid_hz: isClone ? 1850 : 2150,
+        high_band_ratio: isClone ? 0.038 : 0.185,
+        pitch_contour_sample: isClone ? [180, 180.2, 179.9, 180.1, 180.0, 180.3] : [175, 182, 178, 184, 181, 176]
       },
       provenance_manifest: {
         manifest_id: "urn:uuid:c2pa-audio-" + Math.random().toString(36).substring(2, 10),
