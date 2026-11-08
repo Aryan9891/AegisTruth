@@ -198,8 +198,11 @@ function initSidebar() {
 }
 
 function switchTab(tabId) {
-  const tabBtn = document.querySelector(`[data-tab=${tabId}]`);
-  if (tabBtn) tabBtn.click();
+  const tabBtn = document.querySelector(`[data-tab="${tabId}"]`);
+  if (tabBtn) {
+    tabBtn.click();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 }
 
 // 3. 6-Axis Interactive Multi-Modal Radar Canvas in Command Center

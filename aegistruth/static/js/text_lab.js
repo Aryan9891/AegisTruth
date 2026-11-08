@@ -38,16 +38,31 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  function updateTextCounter() {
+    const val = textarea.value.trim();
+    const words = val.length === 0 ? 0 : val.split(/\s+/).length;
+    const chars = textarea.value.length;
+    const pill = document.getElementById("text-counter-pill");
+    if (pill) {
+      pill.textContent = `${words} words | ${chars} characters`;
+    }
+  }
+
+  textarea.addEventListener("input", updateTextCounter);
+
   function handleTextDocFile(file) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (e) => {
       textarea.value = e.target.result;
+      updateTextCounter();
       textarea.focus();
       if (typeof playCyberSound === "function") playCyberSound("click");
     };
     reader.onerror = () => {
-      alert("Failed to read document file: " + file.name);
+      if (typeof playCyberSound === "function") playCyberSound("alert");
+      if (typeof showToast === "function") showToast("Failed to read document file: " + file.name, "alert");
+      else alert("Failed to read document file: " + file.name);
     };
     reader.readAsText(file);
   }
@@ -55,18 +70,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sampleHumanBtn) {
     sampleHumanBtn.addEventListener("click", () => {
       textarea.value = "Honestly, we never expected the results to look like this. After three weeks of sleepless nights debugging the network stack, the latency finally plummeted. It wasn't clean code by any stretch—more like a duct-tape miracle. But tomorrow morning, we ship it anyway, whatever happens.";
+      updateTextCounter();
     });
   }
 
   if (sampleAiBtn) {
     sampleAiBtn.addEventListener("click", () => {
       textarea.value = "In today's fast-paced digital world, it is crucial to remember that technology serves as a beacon of progress. Furthermore, it is worth noting that modern artificial intelligence plays a pivotal role across industries. By navigating the complexities of computational innovation, we can seamlessly integrate these multifaceted solutions. In summary, this groundbreaking paradigm stands as a testament to human ingenuity and continuous evolution.";
+      updateTextCounter();
     });
   }
 
   if (sampleContraBtn) {
     sampleContraBtn.addEventListener("click", () => {
       textarea.value = "During the fiscal year 2024, renewable energy investments increased by 45% nationwide. The expansion created thousands of regional jobs. However, nationwide renewable energy investments decreased significantly over the same fiscal period, declining to record lows. Abraham Lincoln celebrated these technological developments by sending an email to the governors.";
+      updateTextCounter();
     });
   }
 
@@ -82,7 +100,9 @@ document.addEventListener("DOMContentLoaded", () => {
 async function runTextForensics() {
   const text = document.getElementById("text-input").value.trim();
   if (text.length < 20) {
-    alert("Please enter at least 20 characters of text to evaluate.");
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Please enter at least 20 characters of text to evaluate.", "alert");
+    else alert("Please enter at least 20 characters of text to evaluate.");
     return;
   }
 
@@ -103,7 +123,9 @@ async function runTextForensics() {
     const data = await res.json();
     renderTextResults(data);
   } catch (err) {
-    alert("Text analysis error: " + err.message);
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Text analysis error: " + err.message, "alert");
+    else alert("Text analysis error: " + err.message);
   } finally {
     setLoadingState("text-loading", false);
   }
@@ -112,7 +134,9 @@ async function runTextForensics() {
 async function runFactChecking() {
   const text = document.getElementById("text-input").value.trim();
   if (text.length < 20) {
-    alert("Please enter at least 20 characters of text to evaluate.");
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Please enter at least 20 characters of text to evaluate.", "alert");
+    else alert("Please enter at least 20 characters of text to evaluate.");
     return;
   }
 
@@ -133,7 +157,9 @@ async function runFactChecking() {
     const data = await res.json();
     renderFactResults(data);
   } catch (err) {
-    alert("Fact check error: " + err.message);
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Fact check error: " + err.message, "alert");
+    else alert("Fact check error: " + err.message);
   } finally {
     setLoadingState("text-loading", false);
   }

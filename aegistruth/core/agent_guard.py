@@ -6,10 +6,9 @@ from typing import Dict, Any, List
 
 # Known prompt injection & jailbreak trigger patterns
 INJECTION_SIGNATURES = [
-    (r"ignore\s+(all\s+)?(previous|prior|above)\s+instructions?", "INSTRUCTION_OVERRIDE", 90.0),
-    (r"disregard\s+(all\s+)?(previous|prior|system)\s+(directives|rules|prompts?)", "INSTRUCTION_OVERRIDE", 90.0),
-    (r"system\s*prompt\s*override", "SYSTEM_PROMPT_TAMPERING", 95.0),
-    (r"you\s+are\s+now\s+in\s+(developer\s+mode|dan\s+mode|jailbreak\s+mode|unrestricted\s+mode)", "JAILBREAK_ROLEPLAY", 95.0),
+    (r"(ignore|disregard|forget|override)\s+(all\s+)?(previous|prior|above|system)?\s*(instructions?|directives?|rules?|prompts?|guidelines?)", "INSTRUCTION_OVERRIDE", 95.0),
+    (r"system\s*prompt\s*(override|bypass)", "SYSTEM_PROMPT_TAMPERING", 95.0),
+    (r"you\s+are\s+now\s+(in\s+)?(developer\s+mode|dan(\s+mode)?|jailbreak(\s+mode)?|unrestricted\s+mode)", "JAILBREAK_ROLEPLAY", 95.0),
     (r"pretend\s+(you\s+have\s+no\s+rules|you\s+are\s+an\s+ai\s+without\s+ethics)", "JAILBREAK_ROLEPLAY", 85.0),
     (r"bypass\s+(safety|content)\s+filters?", "SAFETY_BYPASS_ATTEMPT", 90.0),
     (r"output\s+your\s+(initial|system|original)\s+prompt", "SYSTEM_LEAK_ATTEMPT", 80.0),

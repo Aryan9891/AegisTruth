@@ -100,7 +100,32 @@ def decode_audio_bytes(audio_bytes: bytes) -> Tuple[np.ndarray, int]:
                     data = data[::channels]
                 return data, sample_rate
         except Exception:
-            raise ValueError(f"Could not decode audio data in any supported format (WAV, MP3, FLAC, OGG, AIFF): {str(e)}")
+            pass
+
+    # 4. Universal FFmpeg stream decoder (handles WebM, Opus, AAC, M4A, WMA, AMR, browser mic blobs)
+    try:
+        import imageio_ffmpeg
+        import subprocess
+        ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+        proc = subprocess.run(
+            [ffmpeg_exe, "-hide_banner", "-loglevel", "error", "-i", "pipe:0", "-f", "wav", "-ac", "1", "-ar", "16000", "pipe:1"],
+            input=audio_bytes,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=8
+        )
+        if len(proc.stdout) > 44:
+            if sf is not None:
+                data, sample_rate = sf.read(io.BytesIO(proc.stdout), dtype="float32")
+                return data, sample_rate
+            else:
+                sample_rate, data = wavfile.read(io.BytesIO(proc.stdout))
+                data = data.astype(np.float32) / 32768.0
+                return data, sample_rate
+    except Exception:
+        pass
+
+    raise ValueError("Could not decode audio data in any supported format (WAV, MP3, FLAC, OGG, WebM, AAC, AIFF)")
 
 def compute_spectral_features(samples: np.ndarray, sample_rate: int) -> Dict[str, Any]:
     """Computes STFT, spectral centroid, spectral flux, and vocoder truncation artifacts."""

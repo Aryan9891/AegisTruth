@@ -67,6 +67,11 @@ function initComparisonSlider() {
     if (isDraggingSlider) setSliderPos(e.clientX);
   });
 
+  // Clicking anywhere on container snaps slider
+  container.addEventListener("click", (e) => {
+    setSliderPos(e.clientX);
+  });
+
   // Touch support for mobile/tablet
   handle.addEventListener("touchstart", () => { isDraggingSlider = true; });
   window.addEventListener("touchend", () => { isDraggingSlider = false; });
@@ -101,7 +106,9 @@ async function loadSampleImage(filename) {
     const data = await res.json();
     renderImageResults(data);
   } catch (err) {
-    alert("Error analyzing sample: " + err.message);
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Error analyzing sample: " + err.message, "alert");
+    else alert("Error analyzing sample: " + err.message);
   } finally {
     setLoadingState("image-loading", false);
   }
@@ -127,7 +134,9 @@ async function processImageFile(file) {
     const data = await res.json();
     renderImageResults(data);
   } catch (err) {
-    alert("Image analysis error: " + err.message);
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Image analysis error: " + err.message, "alert");
+    else alert("Image analysis error: " + err.message);
   } finally {
     setLoadingState("image-loading", false);
   }
@@ -185,10 +194,10 @@ function renderImageResults(data) {
   document.getElementById("img-view-fft").src = data.visualizations.fft_spectrum;
 
   // Metrics
-  document.getElementById("metric-grid-ratio").textContent = data.metrics.frequency_domain.grid_spike_ratio;
-  document.getElementById("metric-high-freq").textContent = data.metrics.frequency_domain.high_freq_ratio;
-  document.getElementById("metric-ela-var").textContent = data.metrics.ela.error_variance;
-  document.getElementById("metric-noise-discrepancy").textContent = data.metrics.noise_residuals.quadrant_discrepancy;
+  document.getElementById("metric-grid-ratio").textContent = data.metrics?.frequency_domain?.grid_spike_ratio ?? "--";
+  document.getElementById("metric-high-freq").textContent = data.metrics?.frequency_domain?.high_freq_ratio ?? "--";
+  document.getElementById("metric-ela-var").textContent = data.metrics?.ela?.error_variance ?? "--";
+  document.getElementById("metric-noise-discrepancy").textContent = data.metrics?.noise_residuals?.quadrant_discrepancy ?? "--";
 
   // Evidentiary Reasons
   const reasonsList = document.getElementById("image-reasons-list");

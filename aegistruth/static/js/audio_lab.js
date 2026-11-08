@@ -89,7 +89,9 @@ async function toggleMicRecording() {
       btn.classList.remove("btn-primary");
       btn.classList.add("btn-danger");
     } catch (err) {
-      alert("Microphone access failed: " + err.message);
+      if (typeof playCyberSound === "function") playCyberSound("alert");
+      if (typeof showToast === "function") showToast("Microphone access failed: " + err.message, "alert");
+      else alert("Microphone access failed: " + err.message);
     }
   }
 }
@@ -160,20 +162,23 @@ async function loadSampleAudio(filename) {
     if (!directSample.ok) throw new Error("Could not fetch sample audio asset");
 
     const blob = await directSample.blob();
-    await processAudioFile(blob);
+    await processAudioFile(blob, filename);
   } catch (err) {
-    alert("Audio sample error: " + err.message);
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Audio sample error: " + err.message, "alert");
+    else alert("Audio sample error: " + err.message);
   } finally {
     setLoadingState("audio-loading", false);
   }
 }
 
-async function processAudioFile(file) {
+async function processAudioFile(file, nameHint) {
   setLoadingState("audio-loading", true);
   if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
+    const filename = nameHint || (file && file.name) || "audio.wav";
     const formData = new FormData();
-    formData.append("file", file, "audio.wav");
+    formData.append("file", file, filename);
 
     const res = await fetch("/api/forensics/audio", {
       method: "POST",
@@ -188,7 +193,9 @@ async function processAudioFile(file) {
     const data = await res.json();
     renderAudioResults(data);
   } catch (err) {
-    alert("Audio processing error: " + err.message);
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Audio processing error: " + err.message, "alert");
+    else alert("Audio processing error: " + err.message);
   } finally {
     setLoadingState("audio-loading", false);
   }

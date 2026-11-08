@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Load audit logs automatically when tab opens
-  const proxyTab = document.querySelector("[data-tab=tab-proxy]");
+  const proxyTab = document.querySelector('[data-tab="tab-proxy"]');
   if (proxyTab) {
     proxyTab.addEventListener("click", fetchProxyLogs);
   }
@@ -106,17 +106,33 @@ async function fetchProxyLogs() {
     data.logs.forEach(log => {
       const tr = document.createElement("tr");
       tr.style.borderBottom = "1px solid rgba(255,255,255,0.06)";
-      const isBlocked = log.status.includes("BLOCK");
+      const isBlocked = (log.status || "").includes("BLOCK");
       const statusColor = isBlocked ? "#f43f5e" : "#10b981";
 
-      const timeStr = new Date(log.timestamp * 1000).toLocaleTimeString();
+      let timeStr = "";
+      if (typeof log.timestamp === "number") {
+        timeStr = new Date(log.timestamp * 1000).toLocaleTimeString();
+      } else if (typeof log.timestamp === "string") {
+        const d = new Date(log.timestamp);
+        timeStr = isNaN(d.getTime()) ? log.timestamp : d.toLocaleTimeString();
+      } else {
+        timeStr = new Date().toLocaleTimeString();
+      }
+
+      const reqId = log.request_id || log.id || "aegis-unknown";
+      const threatScore = (log.prompt_threat_score !== undefined)
+        ? log.prompt_threat_score
+        : (log.threat_score !== undefined ? log.threat_score : 0);
+      const violations = (log.violations && log.violations.length > 0)
+        ? log.violations.join(", ")
+        : (log.reason || "None (Clean)");
 
       tr.innerHTML = `
-        <td style="padding: 10px; font-family: monospace; font-size: 12px; color: #38bdf8;">${log.request_id}</td>
+        <td style="padding: 10px; font-family: monospace; font-size: 12px; color: #38bdf8;">${reqId}</td>
         <td style="padding: 10px; font-size: 12px; color: #cbd5e1;">${timeStr}</td>
         <td style="padding: 10px; font-size: 12px; font-weight: bold; color: ${statusColor};">${log.status}</td>
-        <td style="padding: 10px; font-size: 12px; text-align: center;">${log.prompt_threat_score}/100</td>
-        <td style="padding: 10px; font-size: 12px; color: #94a3b8;">${log.violations.length > 0 ? log.violations.join(", ") : "None (Clean)"}</td>
+        <td style="padding: 10px; font-size: 12px; text-align: center;">${threatScore}/100</td>
+        <td style="padding: 10px; font-size: 12px; color: #94a3b8;">${violations}</td>
       `;
       tableBody.appendChild(tr);
     });
