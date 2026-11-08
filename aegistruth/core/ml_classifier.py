@@ -211,3 +211,4 @@ def get_calibrated_classifier() -> CalibratedForensicClassifier:
     if _GLOBAL_FORENSIC_CLASSIFIER is None:
         _GLOBAL_FORENSIC_CLASSIFIER = CalibratedForensicClassifier.load()
     return _GLOBAL_FORENSIC_CLASSIFIER
+

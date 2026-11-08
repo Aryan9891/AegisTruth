@@ -72,14 +72,31 @@ function initComparisonSlider() {
     setSliderPos(e.clientX);
   });
 
-  // Touch support for mobile/tablet
-  handle.addEventListener("touchstart", () => { isDraggingSlider = true; });
-  window.addEventListener("touchend", () => { isDraggingSlider = false; });
-  window.addEventListener("touchmove", (e) => {
-    if (isDraggingSlider && e.touches.length > 0) {
+  // Enhanced touch support for mobile & tablet screens
+  function handleTouch(e) {
+    if (e.touches && e.touches.length > 0) {
       setSliderPos(e.touches[0].clientX);
     }
-  });
+  }
+
+  handle.addEventListener("touchstart", (e) => {
+    isDraggingSlider = true;
+    handleTouch(e);
+  }, { passive: true });
+
+  container.addEventListener("touchstart", (e) => {
+    isDraggingSlider = true;
+    handleTouch(e);
+  }, { passive: true });
+
+  window.addEventListener("touchend", () => { isDraggingSlider = false; });
+  window.addEventListener("touchcancel", () => { isDraggingSlider = false; });
+
+  window.addEventListener("touchmove", (e) => {
+    if (isDraggingSlider) {
+      handleTouch(e);
+    }
+  }, { passive: true });
 }
 
 async function loadSampleImage(filename) {

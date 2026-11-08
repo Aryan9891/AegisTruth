@@ -57,17 +57,23 @@
     updateEngineBadge(false, "BROWSER_WASM");
   }
 
-  // Global fetch proxy so all existing UI scripts work transparently on GitHub Pages
+  // Global fetch proxy so all existing UI scripts work transparently on GitHub Pages and mobile
   window.fetch = async function (resource, init) {
-    if (typeof resource === "string") {
+    let urlStr = typeof resource === "string" ? resource : (resource && resource.url ? resource.url : "");
+    if (urlStr) {
+      // Strip origin if absolute URL matching current origin
+      urlStr = urlStr.replace(/^[a-z]+:\/\/[^/]+/i, "");
+      // Strip repo base path for GitHub Pages (/AegisTruth/)
+      urlStr = urlStr.replace(/^\/AegisTruth\//i, "/");
+
       // 1. Rewrite /static/samples/ or /static/... to relative paths for GitHub Pages
-      if (resource.startsWith("/static/") || resource.startsWith("static/")) {
-        const rel = resource.replace(/^\/?static\//, "");
-        return nativeFetch(rel, init).catch(() => nativeFetch(resource, init));
+      if (urlStr.startsWith("/static/") || urlStr.startsWith("static/")) {
+        const rel = urlStr.replace(/^\/?static\//, "");
+        return nativeFetch(rel, init).catch(() => nativeFetch(urlStr, init));
       }
       // 2. Intercept /api/ and /v1/ routes
-      if (resource.startsWith("/api/") || resource.startsWith("api/") || resource.startsWith("/v1/") || resource.startsWith("v1/")) {
-        const normalized = resource.startsWith("/") ? resource : "/" + resource;
+      if (urlStr.startsWith("/api/") || urlStr.startsWith("api/") || urlStr.startsWith("/v1/") || urlStr.startsWith("v1/")) {
+        const normalized = urlStr.startsWith("/") ? urlStr : "/" + urlStr;
         return aegisApiFetch(normalized, init);
       }
     }

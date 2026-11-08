@@ -75,3 +75,4 @@ def test_benchmark_evaluation():
     assert metrics["precision"] >= 0.90
     assert metrics["recall"] >= 0.90
     assert metrics["f1_score"] >= 0.90
+

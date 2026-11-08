@@ -191,6 +191,40 @@ function initSidebar() {
     });
   }
 
+  // Touch swipe gestures for mobile sidebar drawer
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  window.addEventListener("touchstart", (e) => {
+    if (e.touches && e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  window.addEventListener("touchend", (e) => {
+    if (e.changedTouches && e.changedTouches.length === 1 && sidebar) {
+      const deltaX = e.changedTouches[0].clientX - touchStartX;
+      const deltaY = e.changedTouches[0].clientY - touchStartY;
+
+      // Ensure horizontal swipe is dominant
+      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+        // Swipe left to close drawer when open
+        if (deltaX < -50 && sidebar.classList.contains("mobile-open")) {
+          sidebar.classList.remove("mobile-open");
+          if (backdrop) backdrop.classList.remove("active");
+          if (typeof playCyberSound === "function") playCyberSound("click");
+        }
+        // Swipe right from left edge (< 35px) to open drawer
+        else if (deltaX > 60 && touchStartX < 35 && !sidebar.classList.contains("mobile-open")) {
+          sidebar.classList.add("mobile-open");
+          if (backdrop) backdrop.classList.add("active");
+          if (typeof playCyberSound === "function") playCyberSound("click");
+        }
+      }
+    }
+  }, { passive: true });
+
   // Header quick benchmark button
   if (headerBenchmark) {
     headerBenchmark.addEventListener("click", runFullDiagnosticBenchmark);

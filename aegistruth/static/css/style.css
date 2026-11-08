@@ -528,7 +528,56 @@ body {
   z-index: 10;
 }
 
-/* Responsive Drawer for Tablet & Mobile */
+/* Responsive Grid Classes */
+.responsive-radar-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.feature-modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 24px;
+}
+
+.responsive-video-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.responsive-audio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.responsive-tool-grid {
+  display: grid;
+  grid-template-columns: 180px 1fr 140px;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Responsive Table Wrapper with Touch Momentum Scrolling */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  margin: 12px 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.table-responsive-wrapper table {
+  min-width: 580px;
+  width: 100%;
+}
+
+/* Responsive Breakpoint: Tablet & Small Desktop (<= 1024px) */
 @media (max-width: 1024px) {
   .mobile-hamburger-btn {
     display: flex;
@@ -540,6 +589,8 @@ body {
     left: 0;
     bottom: 0;
     height: 100vh;
+    width: min(300px, 85vw);
+    max-width: 320px;
     transform: translateX(-100%);
     box-shadow: 20px 0 50px rgba(0, 0, 0, 0.85);
     z-index: 200;
@@ -555,6 +606,7 @@ body {
     inset: 0;
     background: rgba(2, 6, 16, 0.75);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     z-index: 190;
   }
 
@@ -562,12 +614,226 @@ body {
     display: block;
   }
 
+  .sidebar-collapse-btn {
+    display: none;
+  }
+
   .workspace-header {
     padding: 0 16px;
   }
 
   .workspace-main {
-    padding: 20px 14px 60px 14px;
+    padding: 20px 16px 60px 16px;
+  }
+}
+
+/* Responsive Breakpoint: Large Tablets & Mid-Mobile (<= 860px) */
+@media (max-width: 860px) {
+  .responsive-radar-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .responsive-video-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .responsive-audio-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .responsive-tool-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .responsive-tool-grid select,
+  .responsive-tool-grid input,
+  .responsive-tool-grid button {
+    width: 100%;
+  }
+
+  .contradiction-comparison {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+/* Responsive Breakpoint: Mobile Phones (<= 640px) */
+@media (max-width: 640px) {
+  .workspace-header {
+    height: auto;
+    min-height: 56px;
+    padding: 10px 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .breadcrumb-label {
+    display: none;
+  }
+
+  .breadcrumb-active-title {
+    font-size: 13.5px;
+  }
+
+  .workspace-header-right {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  #shortcut-cmd-k {
+    display: none;
+  }
+
+  #engine-mode-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  #btn-header-benchmark {
+    padding: 6px 12px;
+    font-size: 11.5px;
+  }
+
+  .workspace-main {
+    padding: 16px 10px 60px 10px;
+  }
+
+  .glass-panel {
+    padding: 18px 14px !important;
+    border-radius: 14px;
+  }
+
+  h1 {
+    font-size: 21px !important;
+    line-height: 1.25;
+  }
+
+  h2 {
+    font-size: 18px !important;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 15px !important;
+  }
+
+  .stat-card {
+    padding: 16px 14px;
+  }
+
+  .stat-value {
+    font-size: 26px;
+  }
+
+  .stat-desc {
+    font-size: 11.5px;
+  }
+
+  .telemetry-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .viewer-split {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .gauge-container {
+    padding: 16px 12px;
+    gap: 14px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .gauge-container > div:last-child {
+    width: 100%;
+    margin-left: 0 !important;
+    margin-top: 8px;
+  }
+
+  .gauge-container > div:last-child button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dropzone {
+    padding: 24px 12px;
+  }
+
+  .dropzone-icon {
+    font-size: 32px;
+  }
+
+  .holo-card {
+    padding: 18px 14px;
+  }
+
+  .modal-card {
+    width: 95%;
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  .cmd-palette {
+    width: 95%;
+    margin-top: 10vh;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .evidence-list li {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .comparison-slider-container {
+    height: clamp(200px, 56vw, 300px);
+  }
+
+  .ambient-glow-orb {
+    opacity: 0.15;
+    filter: blur(80px);
+  }
+}
+
+/* Responsive Breakpoint: Small Mobile Phones (<= 380px) */
+@media (max-width: 380px) {
+  .workspace-main {
+    padding: 12px 6px 60px 6px;
+  }
+
+  .glass-panel {
+    padding: 14px 10px !important;
+  }
+
+  h1 {
+    font-size: 19px !important;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  .gauge-svg {
+    width: 96px;
+    height: 96px;
+  }
+
+  .gauge-score-text {
+    font-size: 24px;
+  }
+
+  .badge-verdict {
+    padding: 6px 12px;
+    font-size: 11.5px;
   }
 }
 
@@ -733,19 +999,24 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 24px;
+  padding: 16px;
   position: relative;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 #command-center-radar {
-  width: 320px;
-  height: 320px;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  aspect-ratio: 1 / 1;
 }
 
 /* Circular Radial Threat Gauge */
 .gauge-container {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 24px;
   padding: 22px;
   background: rgba(0, 0, 0, 0.3);
@@ -757,6 +1028,7 @@ body {
   width: 120px;
   height: 120px;
   transform: rotate(-90deg);
+  flex-shrink: 0;
 }
 
 .gauge-bg-circle {
@@ -787,7 +1059,7 @@ body {
   position: relative;
   width: 100%;
   max-width: 520px;
-  height: 340px;
+  height: clamp(220px, 48vw, 340px);
   overflow: hidden;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -795,6 +1067,7 @@ body {
   user-select: none;
   background: #000;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  touch-action: none;
 }
 
 .comparison-slider-container img {
@@ -826,6 +1099,7 @@ body {
   box-shadow: 0 0 16px var(--neon-cyan);
   cursor: ew-resize;
   z-index: 10;
+  touch-action: none;
 }
 
 .comparison-handle-knob {
@@ -833,17 +1107,18 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   background: var(--bg-surface);
   border: 2px solid var(--neon-cyan);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--neon-cyan);
   box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+  touch-action: none;
 }
 
 /* Range Sliders */
