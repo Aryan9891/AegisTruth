@@ -3,7 +3,8 @@
 [![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13%20%7C%203.14-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.162.2-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com)
 [![SciPy](https://img.shields.io/badge/SciPy-Signal%20Processing-0054A6.svg?logo=scipy)](https://scipy.org)
-[![Tests](https://img.shields.io/badge/Tests-48%20Passed%20(100%25)-success.svg)](https://pytest.org)
+[![Tests](https://img.shields.io/badge/Tests-51%20Passed%20(100%25)-success.svg)](https://pytest.org)
+[![License](https://img.shields.io/badge/License-Source--Available%20%7C%20No--Redistribution-red.svg)](LICENSE)
 [![Security Standard](https://img.shields.io/badge/C2PA-Compatible%20Provenance-6366f1.svg)](https://c2pa.org)
 
 > **The definitive open-source cognitive defense platform for verifying the authenticity of AI-generated images, cloned voices, synthetic text, hallucinated facts, and adversarial agent prompts.**
@@ -194,15 +195,28 @@ tests/test_client.py ................ PASSED [ 62%]
 tests/test_fact_checker.py .......... PASSED [ 70%]
 tests/test_image_forensics.py ....... PASSED [ 79%]
 tests/test_provenance.py ............ PASSED [ 85%]
-tests/test_text_forensics.py ........ PASSED [ 93%]
+tests/test_text_forensics.py ........ PASSED [ 88%]
+tests/test_universal_formats.py ...... PASSED [ 94%]
 tests/test_video_forensics.py ....... PASSED [100%]
 
-======================== 48 passed in 3.39s ========================
+======================== 51 passed in 2.44s ========================
 ```
 
 ---
 
-## 📄 License & Attribution
+## 📄 License & Terms of Use
 
-Created with pride as an open, autonomous cognitive defense platform. Built with Python 3.14, FastAPI, SciPy, NumPy, and Pillow.
+This software is released under the **AegisTruth Source-Available & Non-Redistribution License**.
+
+> [!IMPORTANT]
+> **Copyright (c) 2026 Aryan (@Aryan9891). All Rights Reserved.**
+>
+> - **Permitted Personal & Research Use**: You are welcome to clone, download, inspect, study, and run AegisTruth locally for personal, educational, academic, and internal evaluation purposes.
+> - **Strictly Prohibited**:
+>   - **No Git Re-publishing / Re-hosting**: You may **NOT** copy, mirror, fork for republication, or re-upload this repository or any of its source files, designs, or code to GitHub, GitLab, Bitbucket, Gitea, or any public or third-party Git/code platform.
+>   - **No Redistribution**: You may not distribute, sublicense, sell, or broadcast the code to third parties.
+>   - **No Commercial Exploitation**: Commercial use, packaging into proprietary products or SaaS offerings is strictly forbidden without prior written permission from Aryan (@Aryan9891).
+
+For the full legal terms, please read the [LICENSE](LICENSE) file.
+
 
