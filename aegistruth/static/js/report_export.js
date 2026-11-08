@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function getActiveManifest() {
-  return window.currentImageManifest || window.currentAudioManifest || window.currentTextManifest || null;
+  return window.currentImageManifest || window.currentVideoManifest || window.currentAudioManifest || window.currentTextManifest || null;
 }
 
 function displayActiveManifest() {

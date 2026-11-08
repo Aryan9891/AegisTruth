@@ -205,6 +205,11 @@ function renderAudioResults(data) {
     if (typeof showToast === "function") showToast(`Acoustic Clone Detected: ${data.verdict}`, "alert");
   }
 
+  // Update dynamic radar state
+  if (window.radarScores) {
+    window.radarScores.audio = Math.max(5, Math.round(100 - data.synthetic_probability));
+  }
+
   // Score & Verdict
   const verdictEl = document.getElementById("audio-verdict-badge");
   verdictEl.className = "badge-verdict";

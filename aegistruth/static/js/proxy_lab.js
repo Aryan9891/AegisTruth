@@ -59,6 +59,14 @@ async function testAgentProxyRequest() {
     const data = await res.json();
     const isBlocked = data.security_manifest && data.security_manifest.verdict === "BLOCKED";
 
+    if (isBlocked) {
+      if (typeof playCyberSound === "function") playCyberSound("alert");
+      if (typeof showToast === "function") showToast("Zero-Trust Gateway Intercepted Destructive Payload!", "alert");
+    } else {
+      if (typeof playCyberSound === "function") playCyberSound("success");
+      if (typeof showToast === "function") showToast("Gateway Forwarded Safe Request", "success");
+    }
+
     statusBox.style.borderColor = isBlocked ? "#f43f5e" : "#10b981";
     statusBox.style.background = isBlocked ? "rgba(244, 63, 94, 0.08)" : "rgba(16, 185, 129, 0.08)";
 

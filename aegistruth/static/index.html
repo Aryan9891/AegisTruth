@@ -7,12 +7,17 @@
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
+  <!-- Ambient Background Glow Orbs -->
+  <div class="ambient-glow-orb orb-1"></div>
+  <div class="ambient-glow-orb orb-2"></div>
+  <div class="ambient-glow-orb orb-3"></div>
+
   <!-- Background Animated Neural Matrix Canvas -->
   <canvas id="bg-neural-canvas"></canvas>
 
-  <!-- Top Navigation Header -->
+  <!-- Top Master Navigation Header -->
   <header>
-    <div class="brand-wrapper" onclick="document.querySelector('[data-tab=tab-overview]').click()">
+    <div class="brand-wrapper" onclick="switchTab('tab-overview')">
       <div class="shield-badge">&#x1F6E1;</div>
       <div>
         <div class="brand-title">AEGIS-TRUTH</div>
@@ -32,6 +37,14 @@
     </nav>
 
     <div class="header-actions">
+      <!-- Theme Accent Selector -->
+      <div class="theme-switcher-wrapper" title="Switch Cyberpunk Theme Accent">
+        <div class="theme-dot theme-cyan active" data-theme="cyan" title="Cyber Cyan Accent"></div>
+        <div class="theme-dot theme-purple" data-theme="purple" title="Ultraviolet Accent"></div>
+        <div class="theme-dot theme-emerald" data-theme="emerald" title="Matrix Emerald Accent"></div>
+        <div class="theme-dot theme-amber" data-theme="amber" title="Solar Amber Accent"></div>
+      </div>
+      <button id="shortcut-cmd-k" class="shortcut-pill" title="Press Ctrl+K to search">&#x2318;K Search</button>
       <button id="sound-toggle-btn" class="sound-toggle-btn active">&#x1F50A; Audio SFX: ON</button>
       <div class="status-pill">
         <div class="pulse-dot"></div>
@@ -47,8 +60,8 @@
       <!-- Top Actions Bar -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
         <div>
-          <h1 style="font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">Cognitive Security Command Center</h1>
-          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+          <h1 style="font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Cognitive Security Command Center</h1>
+          <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
             Real-time multi-modal forensic telemetry across vision, temporal video, acoustics, semantics, and agent runtime.
           </p>
         </div>
@@ -57,7 +70,7 @@
         </button>
       </div>
 
-      <!-- Telemetry Cards -->
+      <!-- Telemetry Cards Grid -->
       <div class="telemetry-grid">
         <div class="glass-panel stat-card">
           <div class="stat-header">
@@ -96,14 +109,49 @@
         </div>
       </div>
 
+      <!-- Interactive Radar & System Architecture Grid -->
+      <div style="display: grid; grid-template-columns: 360px 1fr; gap: 24px; margin-bottom: 24px;">
+        <!-- 6-Axis Interactive Multi-Modal Radar -->
+        <div class="glass-panel" style="padding: 24px; text-align: center;">
+          <h3 style="font-size: 14px; font-family: 'JetBrains Mono', monospace; color: var(--neon-cyan); margin-bottom: 12px; text-transform: uppercase;">
+            Multi-Modal Threat Shield Radar
+          </h3>
+          <div class="radar-wrapper">
+            <canvas id="command-center-radar"></canvas>
+          </div>
+          <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 8px;">
+            Dynamic 6-axis polygonal defense telemetry matrix
+          </div>
+        </div>
+
+        <!-- Global Security Advisory & Intelligence Stream -->
+        <div class="glass-panel" style="padding: 28px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h3 style="font-size: 16px; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+              <span>&#x1F6E1;</span> Global Generative AI Threat Intelligence Feed
+            </h3>
+            <ul class="evidence-list">
+              <li><strong>Zero-Shot Voice Cloning Scams:</strong> Increased prevalence of 3-second audio phone cloning mimicking executive &amp; family speech.</li>
+              <li><strong>Diffusion Transposed Upsampling Artifacts:</strong> Midjourney v6 and Flux generators leave distinctive high-frequency Fourier harmonic peaks.</li>
+              <li><strong>Invisible Prompt Injection:</strong> Documents containing zero-width unicode characters (`\u200b`) attempting to hijack AI agent tool callers.</li>
+              <li><strong>Hallucinatory Internal Drift:</strong> LLM summaries containing semantic trajectory contradictions regarding historical/economic metrics.</li>
+            </ul>
+          </div>
+          <div style="display: flex; gap: 12px; margin-top: 16px;">
+            <button class="btn-secondary" onclick="switchTab('tab-guard')">&#x1F512; Inspect Agent Firewall</button>
+            <button class="btn-secondary" onclick="switchTab('tab-proxy')">&#x1F310; View Intercepted Logs</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Quick Action Modules -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-top: 10px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
         <div class="glass-panel" style="padding: 28px;">
           <h3 style="color: #38bdf8; margin-bottom: 12px; font-size: 18px;">&#x1F441; Image &amp; Deepfake Analysis</h3>
           <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
             Detect synthetic Diffusion (Midjourney/Flux/SD) and GAN generations using Error Level Analysis (ELA), 2D Fourier radial power spectrum, and camera sensor noise residuals. Includes interactive split-screen wipe.
           </p>
-          <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-visual]').click()">Open Visual Lab &rarr;</button>
+          <button class="btn-primary" onclick="switchTab('tab-visual')">Open Visual Lab &rarr;</button>
         </div>
 
         <div class="glass-panel" style="padding: 28px;">
@@ -111,7 +159,7 @@
           <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
             Examine frame sequences, animated media, and video clips for facial boundary flicker, optical flow discontinuity, and high-frequency generative upsampling artifacts.
           </p>
-          <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-video]').click()">Open Video Lab &rarr;</button>
+          <button class="btn-primary" onclick="switchTab('tab-video')">Open Video Lab &rarr;</button>
         </div>
 
         <div class="glass-panel" style="padding: 28px;">
@@ -119,7 +167,7 @@
           <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
             Analyze incoming audio calls or recordings for ElevenLabs-style neural vocoder artifacts, flat pitch micro-jitter, and artificial respiratory silence.
           </p>
-          <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-audio]').click()">Open Acoustic Lab &rarr;</button>
+          <button class="btn-primary" onclick="switchTab('tab-audio')">Open Acoustic Lab &rarr;</button>
         </div>
 
         <div class="glass-panel" style="padding: 28px;">
@@ -127,7 +175,7 @@
           <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
             Drop-in OpenAI-compatible reverse proxy (<code>http://127.0.0.1:8000/v1</code>) with real-time prompt injection shielding, tool sandbox quarantine, and post-flight fact checking.
           </p>
-          <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-proxy]').click()">Open Agent Proxy &rarr;</button>
+          <button class="btn-primary" onclick="switchTab('tab-proxy')">Open Agent Proxy &rarr;</button>
         </div>
       </div>
     </section>
@@ -172,7 +220,7 @@
               <div id="image-verdict-desc" style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;"></div>
             </div>
             <div style="margin-left: auto;">
-              <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-provenance]').click(); displayActiveManifest();">
+              <button class="btn-primary" onclick="switchTab('tab-provenance'); displayActiveManifest();">
                 &#x1F510; View C2PA Manifest
               </button>
             </div>
@@ -277,7 +325,7 @@
               <div id="video-verdict-desc" style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;"></div>
             </div>
             <div style="margin-left: auto;">
-              <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-provenance]').click(); displayActiveManifest();">
+              <button class="btn-primary" onclick="switchTab('tab-provenance'); displayActiveManifest();">
                 &#x1F510; View C2PA Manifest
               </button>
             </div>
@@ -368,7 +416,7 @@
               <div id="audio-verdict-desc" style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;"></div>
             </div>
             <div style="margin-left: auto;">
-              <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-provenance]').click(); displayActiveManifest();">
+              <button class="btn-primary" onclick="switchTab('tab-provenance'); displayActiveManifest();">
                 &#x1F510; View C2PA Manifest
               </button>
             </div>
@@ -453,7 +501,7 @@
               <div id="text-verdict-desc" style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;"></div>
             </div>
             <div style="margin-left: auto;">
-              <button class="btn-primary" onclick="document.querySelector('[data-tab=tab-provenance]').click(); displayActiveManifest();">
+              <button class="btn-primary" onclick="switchTab('tab-provenance'); displayActiveManifest();">
                 &#x1F510; View C2PA Manifest
               </button>
             </div>
@@ -508,6 +556,16 @@
               <div class="stat-label">Grounded Verified Claims</div>
               <div class="stat-value" id="fact-verified-count" style="font-size: 28px; color: #a855f7;">--</div>
             </div>
+          </div>
+
+          <!-- Semantic Contradictions Alert Section -->
+          <div id="fact-contradictions-section" style="display: none; margin-top: 24px;">
+            <div id="fact-contradictions-list"></div>
+          </div>
+
+          <!-- Anachronisms Alert Section -->
+          <div id="fact-anachronisms-section" style="display: none; margin-top: 16px;">
+            <div id="fact-anachronisms-list"></div>
           </div>
 
           <div style="margin-top: 24px;">
@@ -648,12 +706,41 @@
           <button class="btn-secondary" id="btn-view-manifest">&#x1F4CB; Refresh Active Manifest JSON</button>
         </div>
 
-        <pre id="manifest-json-display" style="background: #080c16; padding: 22px; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--neon-cyan); border: 1px solid rgba(255,255,255,0.08); max-height: 480px; overflow-y: auto;">
+        <!-- 3D Holographic Certificate Card -->
+        <div class="holo-card-wrapper">
+          <div class="holo-card" id="holo-cert-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 18px;">
+              <div>
+                <div style="font-size: 18px; font-weight: 800; color: #38bdf8; letter-spacing: 1px;">&#x1F6E1; AEGIS-TRUTH VERIFIED SEAL</div>
+                <div style="font-size: 12px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">C2PA Forensic Attestation Standard</div>
+              </div>
+              <div style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 12px;">
+                SEALED &amp; VERIFIED
+              </div>
+            </div>
+            <div style="font-size: 13px; color: #cbd5e1; line-height: 1.6;">
+              <p>This cryptographic manifest certifies that the asset has undergone multi-modal frequency domain, temporal consistency, and error-level forensic examination.</p>
+            </div>
+            <div style="margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--neon-cyan); background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px;">
+              Hover over this card to inspect 3D holographic specular reflection.
+            </div>
+          </div>
+        </div>
+
+        <pre id="manifest-json-display" style="background: #080c16; padding: 22px; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--neon-cyan); border: 1px solid rgba(255,255,255,0.08); max-height: 400px; overflow-y: auto;">
 No active scan manifest. Run an analysis in Visual, Acoustic, Video, or Cognitive Lab to inspect its cryptographic manifest.
         </pre>
       </div>
     </section>
   </main>
+
+  <!-- Command Palette Modal (Ctrl+K) -->
+  <div id="cmd-palette-overlay" class="cmd-palette-overlay">
+    <div class="cmd-palette">
+      <input type="text" id="cmd-palette-input" class="cmd-input" placeholder="Search AegisTruth tools, benchmarks, actions... (or press Esc to exit)">
+      <div id="cmd-palette-results" class="cmd-results"></div>
+    </div>
+  </div>
 
   <!-- Diagnostic Benchmark Progress Modal -->
   <div id="benchmark-modal" class="modal-overlay">

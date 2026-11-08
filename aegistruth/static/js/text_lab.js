@@ -161,9 +161,94 @@ function renderFactResults(data) {
   document.getElementById("text-results-panel").style.display = "none";
   document.getElementById("fact-results-panel").style.display = "block";
 
+  // Audio and Toast feedback
+  const hasContradictions = data.internal_contradictions && data.internal_contradictions.length > 0;
+  const hasAnachronisms = data.anachronisms_detected && data.anachronisms_detected.length > 0;
+
+  if (hasContradictions || hasAnachronisms || data.overall_factuality_score < 50) {
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast("Fact Discrepancies & Contradictions Flagged!", "alert");
+  } else {
+    if (typeof playCyberSound === "function") playCyberSound("success");
+    if (typeof showToast === "function") showToast("Factuality Assessment Complete", "success");
+  }
+
+  // Update dynamic radar state
+  if (window.radarScores) {
+    window.radarScores.fact = Math.max(5, Math.round(data.overall_factuality_score));
+  }
+
   document.getElementById("fact-score-val").textContent = `${data.overall_factuality_score} / 100`;
   document.getElementById("fact-claims-count").textContent = data.total_claims_extracted;
   document.getElementById("fact-verified-count").textContent = data.verified_grounded_count;
+
+  // Render Internal Contradictions Section
+  const contraSec = document.getElementById("fact-contradictions-section");
+  const contraList = document.getElementById("fact-contradictions-list");
+  if (contraSec && contraList) {
+    if (hasContradictions) {
+      contraSec.style.display = "block";
+      contraList.innerHTML = "";
+      data.internal_contradictions.forEach(c => {
+        const card = document.createElement("div");
+        card.className = "contradiction-alert-card";
+        const topics = (c.shared_topics || []).map(t => `<span class="topic-tag">${t}</span>`).join("");
+        card.innerHTML = `
+          <div class="contradiction-header">
+            <span>&#x26A0;</span> Direct Semantic Trajectory Contradiction
+          </div>
+          <div style="font-size: 13px; color: #fca5a5; margin-bottom: 8px;">
+            ${c.issue}
+          </div>
+          <div class="contradiction-comparison">
+            <div class="contra-claim-box pos">
+              <div style="font-size: 11px; color: var(--neon-cyan); margin-bottom: 4px; font-weight: bold;">[CLAIM A]</div>
+              ${c.claim_a}
+            </div>
+            <div class="contra-claim-box neg">
+              <div style="font-size: 11px; color: var(--neon-rose); margin-bottom: 4px; font-weight: bold;">[CLAIM B (OPPOSING)]</div>
+              ${c.claim_b}
+            </div>
+          </div>
+          <div class="contra-topics">
+            <span style="font-size: 11px; color: #94a3b8; align-self: center;">Shared Subject Entities:</span>
+            ${topics}
+          </div>
+        `;
+        contraList.appendChild(card);
+      });
+    } else {
+      contraSec.style.display = "none";
+    }
+  }
+
+  // Render Anachronisms Section
+  const anachroSec = document.getElementById("fact-anachronisms-section");
+  const anachroList = document.getElementById("fact-anachronisms-list");
+  if (anachroSec && anachroList) {
+    if (hasAnachronisms) {
+      anachroSec.style.display = "block";
+      anachroList.innerHTML = "";
+      data.anachronisms_detected.forEach(a => {
+        const card = document.createElement("div");
+        card.className = "anachronism-alert-card";
+        card.innerHTML = `
+          <div class="anachronism-header">
+            <span>&#x23F3;</span> Temporal Anachronism Anomaly Detected
+          </div>
+          <div style="font-size: 13px; color: #cbd5e1; margin-bottom: 6px;">
+            Matched excerpt: <strong style="color: #fde68a;">"${a.match}"</strong>
+          </div>
+          <div style="font-size: 12px; color: var(--neon-amber);">
+            &#x2192; ${a.description}
+          </div>
+        `;
+        anachroList.appendChild(card);
+      });
+    } else {
+      anachroSec.style.display = "none";
+    }
+  }
 
   // Render Claims Matrix
   const tableBody = document.getElementById("fact-claims-table-body");

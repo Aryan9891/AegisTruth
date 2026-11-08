@@ -44,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadSampleVideo(filename) {
   setLoadingState("video-loading", true);
+  if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
     const directSample = await fetch(`/static/samples/${filename}`);
     if (!directSample.ok) throw new Error("Could not fetch sample video asset");
@@ -81,6 +82,7 @@ function createDummyVideoBlob(frames) {
 
 async function processVideoFile(file) {
   setLoadingState("video-loading", true);
+  if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
     const formData = new FormData();
     formData.append("file", file);
@@ -106,6 +108,20 @@ async function processVideoFile(file) {
 
 function renderVideoResults(data) {
   document.getElementById("video-results-panel").style.display = "block";
+
+  // Play audio and toast feedback
+  if (data.verdict === "AUTHENTIC_RECORDING") {
+    if (typeof playCyberSound === "function") playCyberSound("success");
+    if (typeof showToast === "function") showToast("Video verified: Continuous Optical Capture", "success");
+  } else {
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast(`Temporal Deepfake Risk Detected: ${data.verdict}`, "alert");
+  }
+
+  // Update dynamic radar state
+  if (window.radarScores) {
+    window.radarScores.video = Math.max(5, Math.round(100 - data.synthetic_probability));
+  }
 
   // Score & Verdict
   const verdictEl = document.getElementById("video-verdict-badge");

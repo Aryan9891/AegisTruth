@@ -62,6 +62,20 @@ async function scanAgentPrompt() {
 function renderGuardPromptResults(data) {
   document.getElementById("guard-results-panel").style.display = "block";
 
+  // Update dynamic radar state
+  if (window.radarScores) {
+    window.radarScores.agent = Math.max(5, Math.round(100 - data.threat_score));
+  }
+
+  // Audio and Toast feedback
+  if (data.verdict === "ALLOW") {
+    if (typeof playCyberSound === "function") playCyberSound("success");
+    if (typeof showToast === "function") showToast("Prompt verified: Safe for Agent Execution", "success");
+  } else {
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast(`Adversarial Injection Blocked: Threat Score ${data.threat_score}`, "alert");
+  }
+
   const verdictEl = document.getElementById("guard-verdict-badge");
   verdictEl.className = "badge-verdict";
 

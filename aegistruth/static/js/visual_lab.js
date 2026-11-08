@@ -150,6 +150,11 @@ function renderImageResults(data) {
     updateRadialGauge("image-gauge-circle", "image-gauge-score", data.synthetic_probability, true);
   }
 
+  // Update dynamic radar state
+  if (window.radarScores) {
+    window.radarScores.visual = Math.max(5, Math.round(100 - data.synthetic_probability));
+  }
+
   // Verdict Badge
   const verdictEl = document.getElementById("image-verdict-badge");
   verdictEl.className = "badge-verdict";
