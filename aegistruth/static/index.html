@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AegisTruth | Autonomous Multi-Modal AI Forensics &amp; Cognitive Defense</title>
-  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
   <!-- Ambient Background Glow Orbs -->
@@ -143,6 +144,10 @@
         </div>
 
         <div class="workspace-header-right">
+          <div id="engine-mode-badge" class="shortcut-pill" style="color: var(--neon-cyan); border-color: rgba(0,243,255,0.3); font-weight: 700;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--neon-cyan);margin-right:6px;box-shadow:0 0 8px var(--neon-cyan);"></span>
+            Web Sentinel Mode
+          </div>
           <button id="shortcut-cmd-k" class="shortcut-pill" title="Press Ctrl+K to search">
             &#x2318;K Search Tools
           </button>
@@ -870,13 +875,14 @@ No active scan manifest. Run an analysis in Visual, Acoustic, Video, or Cognitiv
   <div id="toast-container"></div>
 
   <!-- Script Includes -->
-  <script src="/static/js/app.js"></script>
-  <script src="/static/js/visual_lab.js"></script>
-  <script src="/static/js/video_lab.js"></script>
-  <script src="/static/js/audio_lab.js"></script>
-  <script src="/static/js/text_lab.js"></script>
-  <script src="/static/js/guard_lab.js"></script>
-  <script src="/static/js/proxy_lab.js"></script>
-  <script src="/static/js/report_export.js"></script>
+  <script src="js/client_engine.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/visual_lab.js"></script>
+  <script src="js/video_lab.js"></script>
+  <script src="js/audio_lab.js"></script>
+  <script src="js/text_lab.js"></script>
+  <script src="js/guard_lab.js"></script>
+  <script src="js/proxy_lab.js"></script>
+  <script src="js/report_export.js"></script>
 </body>
 </html>

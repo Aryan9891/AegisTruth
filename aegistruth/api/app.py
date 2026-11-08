@@ -45,6 +45,15 @@ def create_app() -> FastAPI:
     # Serve static frontend files
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+        css_dir = STATIC_DIR / "css"
+        if css_dir.exists():
+            app.mount("/css", StaticFiles(directory=str(css_dir)), name="css")
+        js_dir = STATIC_DIR / "js"
+        if js_dir.exists():
+            app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
+        samples_dir = STATIC_DIR / "samples"
+        if samples_dir.exists():
+            app.mount("/samples", StaticFiles(directory=str(samples_dir)), name="samples")
 
         @app.get("/", include_in_schema=False)
         async def root():

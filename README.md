@@ -5,6 +5,7 @@
 [![SciPy](https://img.shields.io/badge/SciPy-Signal%20Processing-0054A6.svg?logo=scipy)](https://scipy.org)
 [![Tests](https://img.shields.io/badge/Tests-51%20Passed%20(100%25)-success.svg)](https://pytest.org)
 [![License](https://img.shields.io/badge/License-Source--Available%20%7C%20No--Redistribution-red.svg)](LICENSE)
+[![Live Web Studio](https://img.shields.io/badge/Live%20Studio-GitHub%20Pages-00f3ff.svg?logo=github)](https://aryan9891.github.io/AegisTruth/)
 [![Security Standard](https://img.shields.io/badge/C2PA-Compatible%20Provenance-6366f1.svg)](https://c2pa.org)
 
 > **The definitive open-source cognitive defense platform for verifying the authenticity of AI-generated images, cloned voices, synthetic text, hallucinated facts, and adversarial agent prompts.**
@@ -94,6 +95,20 @@ graph TD
 ### 5. C2PA-Compatible Digital Provenance (`provenance.py`)
 - Calculates SHA-256 and SHA-512 content integrity fingerprints.
 - Generates tamper-evident digital forensic manifests and standalone printable HTML audit certificates.
+
+---
+
+## 🌐 Instant Web Access (No Install Required)
+
+Experience AegisTruth immediately directly in your browser powered by Client-Side Forensic Processing:
+👉 **[Open Live Web Studio on GitHub Pages](https://aryan9891.github.io/AegisTruth/)**
+
+- Full animated cyber-forensics UI with 5 Pinterest-curated themes
+- Interactive image ELA & spatial Fourier inspection
+- Real-time vocal pitch micro-jitter & audio spectrogram
+- Temporal video deepfake optical flow analyzer
+- Cognitive sentence burstiness & propositional claim verification
+- Zero-trust prompt injection firewall testbed
 
 ---
 
