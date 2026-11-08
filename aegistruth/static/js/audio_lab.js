@@ -98,23 +98,48 @@ function drawLiveMicWaveform(canvas, analyser) {
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
   const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
+  const timeData = new Uint8Array(bufferLength);
+  const freqData = new Uint8Array(bufferLength);
 
   function render() {
     animationFrameId = requestAnimationFrame(render);
-    analyser.getByteTimeDomainData(dataArray);
+    analyser.getByteTimeDomainData(timeData);
+    analyser.getByteFrequencyData(freqData);
 
-    ctx.fillStyle = "#090d16";
+    ctx.fillStyle = "#080c16";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#06b6d4";
+
+    // 1. Draw dynamic neon frequency bars in background
+    const numBars = 48;
+    const barWidth = canvas.width / numBars;
+    const step = Math.floor(bufferLength / numBars);
+
+    for (let i = 0; i < numBars; i++) {
+      const barHeight = (freqData[i * step] / 255.0) * (canvas.height * 0.75);
+      const x = i * barWidth;
+      const y = canvas.height - barHeight;
+
+      // Neon cyan-to-purple gradient
+      const grad = ctx.createLinearGradient(0, y, 0, canvas.height);
+      grad.addColorStop(0, "#06b6d4");
+      grad.addColorStop(1, "rgba(168, 85, 247, 0.2)");
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
+    }
+
+    // 2. Draw glowing oscillating waveform line on top
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "#38bdf8";
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "#06b6d4";
     ctx.beginPath();
 
     const sliceWidth = canvas.width / bufferLength;
     let x = 0;
 
     for (let i = 0; i < bufferLength; i++) {
-      const v = dataArray[i] / 128.0;
+      const v = timeData[i] / 128.0;
       const y = (v * canvas.height) / 2;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
@@ -123,6 +148,7 @@ function drawLiveMicWaveform(canvas, analyser) {
 
     ctx.lineTo(canvas.width, canvas.height / 2);
     ctx.stroke();
+    ctx.shadowBlur = 0; // reset shadow
   }
   render();
 }

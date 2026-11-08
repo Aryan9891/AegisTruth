@@ -39,6 +39,23 @@ def get_clipboard_text_fallback() -> str:
     except Exception:
         return ""
 
+def show_windows_toast_notification(title: str, message: str):
+    """Triggers a native Windows balloon/toast notification via PowerShell."""
+    try:
+        import subprocess
+        ps_cmd = f"""
+        [void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms')
+        $objNotifyIcon = New-Object System.Windows.Forms.NotifyIcon
+        $objNotifyIcon.Icon = [System.Drawing.SystemIcons]::Warning
+        $objNotifyIcon.BalloonTipTitle = '{title}'
+        $objNotifyIcon.BalloonTipText = '{message}'
+        $objNotifyIcon.Visible = $True
+        $objNotifyIcon.ShowBalloonTip(4000)
+        """
+        subprocess.Popen(["powershell", "-NoProfile", "-Command", ps_cmd], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
 def sanitize_text(text: str) -> str:
     """Removes invisible zero-width and bidi override characters."""
     bad_chars = {'\u200b', '\u200c', '\u200d', '\ufeff', '\u200e', '\u200f', '\u202a', '\u202b', '\u202c', '\u202d', '\u202e'}
@@ -80,6 +97,12 @@ def monitor_clipboard(poll_interval: float = 1.0, auto_sanitize: bool = True):
                         cleaned = sanitize_text(curr_text)
                         print("[*] Sanitizing clipboard: Invisible zero-width tokens stripped.")
                     print("!" * 70 + "\n")
+                    
+                    # Native Windows toast notification
+                    show_windows_toast_notification(
+                        "AegisTruth Sentinel Alert",
+                        f"Blocked adversarial payload on clipboard! ({prompt_info['verdict']})"
+                    )
 
             time.sleep(poll_interval)
         except KeyboardInterrupt:
