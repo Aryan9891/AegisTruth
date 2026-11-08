@@ -104,13 +104,20 @@ graph TD
 AegisTruth is self-contained with no external API keys required:
 
 ```bash
-# Clone or navigate to the repository
-cd c:\Users\AryanSachin\Desktop\project\AI+
+# Clone the repository
+git clone https://github.com/Aryan9891/AegisTruth.git
+cd AegisTruth
 
-# Activate the virtual environment
+# Create and activate virtual environment
+python -m venv .venv
+
+# On Windows:
 .\.venv\Scripts\activate
 
-# Install dependencies (already prepared)
+# On Linux/macOS:
+source .venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
