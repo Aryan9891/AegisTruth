@@ -35,6 +35,11 @@ MANIFEST
 .coverage
 htmlcov/
 
+# Environment Variables & Secrets
+.env
+*.env
+.env.local
+
 # Editor / OS
 .vscode/
 .idea/
