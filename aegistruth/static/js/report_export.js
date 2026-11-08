@@ -87,7 +87,7 @@ async function downloadHtmlCertificate() {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Failed to export certificate: " + err.message, "alert");
-    else alert("Failed to export certificate: " + err.message);
+    console.error("Failed to export certificate:", err);
   }
 }
 

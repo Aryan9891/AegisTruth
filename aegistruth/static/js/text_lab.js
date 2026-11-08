@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.onerror = () => {
       if (typeof playCyberSound === "function") playCyberSound("alert");
       if (typeof showToast === "function") showToast("Failed to read document file: " + file.name, "alert");
-      else alert("Failed to read document file: " + file.name);
+      console.error("Failed to read document file:", file.name);
     };
     reader.readAsText(file);
   }
@@ -102,7 +102,6 @@ async function runTextForensics() {
   if (text.length < 20) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Please enter at least 20 characters of text to evaluate.", "alert");
-    else alert("Please enter at least 20 characters of text to evaluate.");
     return;
   }
 
@@ -125,7 +124,7 @@ async function runTextForensics() {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Text analysis error: " + err.message, "alert");
-    else alert("Text analysis error: " + err.message);
+    console.error("Text analysis error:", err);
   } finally {
     setLoadingState("text-loading", false);
   }
@@ -136,7 +135,6 @@ async function runFactChecking() {
   if (text.length < 20) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Please enter at least 20 characters of text to evaluate.", "alert");
-    else alert("Please enter at least 20 characters of text to evaluate.");
     return;
   }
 
@@ -159,7 +157,7 @@ async function runFactChecking() {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Fact check error: " + err.message, "alert");
-    else alert("Fact check error: " + err.message);
+    console.error("Fact check error:", err);
   } finally {
     setLoadingState("text-loading", false);
   }

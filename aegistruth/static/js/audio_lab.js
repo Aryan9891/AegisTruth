@@ -91,7 +91,7 @@ async function toggleMicRecording() {
     } catch (err) {
       if (typeof playCyberSound === "function") playCyberSound("alert");
       if (typeof showToast === "function") showToast("Microphone access failed: " + err.message, "alert");
-      else alert("Microphone access failed: " + err.message);
+      console.error("Microphone access failed:", err);
     }
   }
 }
@@ -172,7 +172,7 @@ async function loadSampleAudio(filename) {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Audio sample error: " + err.message, "alert");
-    else alert("Audio sample error: " + err.message);
+    console.error("Audio sample error:", err);
   } finally {
     setLoadingState("audio-loading", false);
   }
@@ -201,7 +201,7 @@ async function processAudioFile(file, nameHint) {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Audio processing error: " + err.message, "alert");
-    else alert("Audio processing error: " + err.message);
+    console.error("Audio processing error:", err);
   } finally {
     setLoadingState("audio-loading", false);
   }

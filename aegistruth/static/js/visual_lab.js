@@ -131,7 +131,7 @@ async function loadSampleImage(filename) {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Error analyzing sample: " + err.message, "alert");
-    else alert("Error analyzing sample: " + err.message);
+    console.error("Error analyzing sample:", err);
   } finally {
     setLoadingState("image-loading", false);
   }
@@ -159,7 +159,7 @@ async function processImageFile(file) {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Image analysis error: " + err.message, "alert");
-    else alert("Image analysis error: " + err.message);
+    console.error("Image analysis error:", err);
   } finally {
     setLoadingState("image-loading", false);
   }

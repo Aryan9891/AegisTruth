@@ -82,7 +82,6 @@ async function scanAgentPrompt() {
   if (!prompt) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Please enter a prompt to inspect.", "alert");
-    else alert("Please enter a prompt to inspect.");
     return;
   }
 
@@ -99,7 +98,7 @@ async function scanAgentPrompt() {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Prompt scan error: " + err.message, "alert");
-    else alert("Prompt scan error: " + err.message);
+    console.error("Prompt scan error:", err);
   }
 }
 
@@ -193,7 +192,7 @@ async function evaluateToolSecurity() {
   } catch (err) {
     if (typeof playCyberSound === "function") playCyberSound("alert");
     if (typeof showToast === "function") showToast("Tool evaluation error: " + err.message, "alert");
-    else alert("Tool evaluation error: " + err.message);
+    console.error("Tool evaluation error:", err);
   }
 }
 

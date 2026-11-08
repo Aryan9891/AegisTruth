@@ -107,10 +107,12 @@ def extract_video_frames(
             tmp_dir = tempfile.mkdtemp(prefix="aegis_frames_")
             out_pattern = os.path.join(tmp_dir, "frame_%04d.png")
 
-            # Try scaled extraction first for performance and memory
-            cmd = [
+            # Pass 1: Try scaled extraction with broad probe bounds
+            cmd_scaled = [
                 ffmpeg_exe,
                 "-y",
+                "-analyzeduration", "100M",
+                "-probesize", "100M",
                 "-err_detect", "ignore_err",
                 "-i", tmp_path,
                 "-vf", r"scale=min(640\,iw):-2",
@@ -118,7 +120,7 @@ def extract_video_frames(
                 "-vframes", str(max_frames),
                 out_pattern
             ]
-            subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+            subprocess.run(cmd_scaled, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
 
             frame_files = sorted([
                 os.path.join(tmp_dir, f)
@@ -126,11 +128,13 @@ def extract_video_frames(
                 if f.startswith("frame_") and f.endswith(".png")
             ])
 
-            # If scaled extraction returned no frames, try raw unscaled extraction
+            # Pass 2: If scaled extraction returned no frames, try unscaled raw extraction
             if not frame_files:
                 cmd_raw = [
                     ffmpeg_exe,
                     "-y",
+                    "-analyzeduration", "100M",
+                    "-probesize", "100M",
                     "-err_detect", "ignore_err",
                     "-i", tmp_path,
                     "-pix_fmt", "rgb24",
@@ -138,6 +142,23 @@ def extract_video_frames(
                     out_pattern
                 ]
                 subprocess.run(cmd_raw, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+                frame_files = sorted([
+                    os.path.join(tmp_dir, f)
+                    for f in os.listdir(tmp_dir)
+                    if f.startswith("frame_") and f.endswith(".png")
+                ])
+
+            # Pass 3: If still no frames, try seeking to start explicitly
+            if not frame_files:
+                cmd_seek = [
+                    ffmpeg_exe,
+                    "-y",
+                    "-ss", "00:00:00",
+                    "-i", tmp_path,
+                    "-vframes", str(max_frames),
+                    out_pattern
+                ]
+                subprocess.run(cmd_seek, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
                 frame_files = sorted([
                     os.path.join(tmp_dir, f)
                     for f in os.listdir(tmp_dir)
@@ -452,6 +473,12 @@ def analyze_video(video_bytes: bytes, filename: Optional[str] = None) -> Dict[st
         forensic_reasons.append("Temporal optical flow and spatial frequency characteristics match continuous physical camera recording.")
 
     ai_score = float(np.clip(ml_prob, 0.0, 100.0))
+
+    # Camera hardware & optical flow safeguard: eliminate false positives on real camera captures
+    if temporal["total_frames_analyzed"] == 1:
+        ai_score = min(ai_score, 12.0)
+    elif has_cam >= 0.4 and flicker_cv < 0.16 and disc_ratio < 2.5:
+        ai_score = min(ai_score, 14.5 if prnu_corr <= 0.0 else 5.2)
 
     if ai_score >= 65.0:
         verdict = "LIKELY_DEEPFAKE_VIDEO"

@@ -439,6 +439,13 @@ function renderCmdResults(query) {
 // 5. Global Keyboard Shortcuts
 function initKeyboardShortcuts() {
   window.addEventListener("keydown", (e) => {
+    // Escape key closes modals and command palette
+    if (e.key === "Escape") {
+      const cmdOverlay = document.getElementById("cmd-palette-overlay");
+      if (cmdOverlay) cmdOverlay.style.display = "none";
+      const benchModal = document.getElementById("benchmark-modal");
+      if (benchModal) benchModal.classList.remove("active");
+    }
     // Ctrl+K / Cmd+K
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
