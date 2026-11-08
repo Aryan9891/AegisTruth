@@ -46,3 +46,4 @@ def test_analyze_text_human_vs_ai():
     assert res_ai["verdict"] == "LIKELY_AI_GENERATED"
     assert res_ai["synthetic_probability"] >= 60.0
     assert len(res_ai["sentence_breakdown"]) >= 3
+

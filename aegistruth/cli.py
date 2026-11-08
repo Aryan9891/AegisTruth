@@ -16,6 +16,7 @@ from aegistruth.core.audio_forensics import analyze_audio
 from aegistruth.core.text_forensics import analyze_text
 from aegistruth.core.fact_checker import verify_facts
 from aegistruth.core.agent_guard import inspect_prompt, inspect_tool_call
+from aegistruth.core.video_forensics import analyze_video
 from aegistruth.core.provenance import generate_provenance_manifest
 
 def print_banner():
@@ -61,6 +62,11 @@ def main():
     fact_parser.add_argument("input", help="Text string or path to text file")
     fact_parser.add_argument("--json", action="store_true", help="Output full JSON results")
 
+    # Video command
+    video_parser = subparsers.add_parser("video", help="Analyze video for temporal deepfake flickers & warping")
+    video_parser.add_argument("path", help="Path to video file (GIF, MP4, WebM)")
+    video_parser.add_argument("--json", action="store_true", help="Output full JSON results")
+
     # Guard command
     guard_parser = subparsers.add_parser("guard", help="Scan prompt for jailbreaks and prompt injection")
     guard_parser.add_argument("prompt", help="Prompt string to scan")
@@ -101,6 +107,27 @@ def main():
             for r in res["forensic_reasons"]:
                 print(f"  - {r}")
             print(f"Manifest Signature: {manifest['manifest_signature'][:16]}...")
+
+    elif args.command == "video":
+        file_path = Path(args.path)
+        if not file_path.exists():
+            print(f"Error: File not found: {args.path}")
+            sys.exit(1)
+        data = file_path.read_bytes()
+        res = analyze_video(data)
+        manifest = generate_provenance_manifest("video", data, res)
+        if args.json:
+            res_clean = {k: v for k, v in res.items() if k != "visualizations"}
+            print(json.dumps(res_clean, indent=2))
+        else:
+            print_banner()
+            print(f"File: {args.path}")
+            print(f"Verdict: {res['verdict']}")
+            print(f"Deepfake Probability: {res['synthetic_probability']}%")
+            print("Forensic Findings:")
+            for r in res["forensic_reasons"]:
+                print(f"  - {r}")
+            print(f"Frames: {res['metrics']['frames_analyzed']} | Temporal Flicker: {res['metrics']['temporal_flicker_score']}")
 
     elif args.command == "audio":
         file_path = Path(args.path)

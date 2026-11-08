@@ -59,3 +59,4 @@ async function downloadHtmlCertificate() {
     alert("Failed to export certificate: " + err.message);
   }
 }
+

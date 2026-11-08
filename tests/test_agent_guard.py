@@ -37,3 +37,4 @@ def test_tool_call_dangerous_wipe():
     assert res["is_safe_to_execute"] is False
     assert res["action"] == "QUARANTINE_DENIED"
     assert res["risk_severity"] == 100.0
+

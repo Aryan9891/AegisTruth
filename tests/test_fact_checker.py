@@ -30,3 +30,4 @@ def test_verify_facts_anachronism():
     res = verify_facts(text)
     assert len(res["anachronisms_detected"]) >= 1
     assert res["overall_factuality_score"] < 50.0
+

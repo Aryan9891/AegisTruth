@@ -11,13 +11,15 @@ from aegistruth.api.routes_audio import router as audio_router
 from aegistruth.api.routes_text import router as text_router
 from aegistruth.api.routes_guard import router as guard_router
 from aegistruth.api.routes_report import router as report_router
+from aegistruth.api.routes_video import router as video_router
+from aegistruth.api.routes_proxy import router as proxy_router
 
 def create_app() -> FastAPI:
     """Factory creating and configuring the AegisTruth FastAPI server."""
     app = FastAPI(
         title="AegisTruth API",
         description="Autonomous Multi-Modal AI Forensics, Deepfake Detection & Fact Verification Sentinel",
-        version="1.0.0",
+        version="1.1.0",
         docs_url="/docs",
         redoc_url="/redoc"
     )
@@ -37,6 +39,8 @@ def create_app() -> FastAPI:
     app.include_router(text_router)
     app.include_router(guard_router)
     app.include_router(report_router)
+    app.include_router(video_router)
+    app.include_router(proxy_router)
 
     # Serve static frontend files
     if STATIC_DIR.exists():

@@ -40,3 +40,4 @@ async function checkSystemHealth() {
     console.warn("Could not connect to health endpoint:", err);
   }
 }
+

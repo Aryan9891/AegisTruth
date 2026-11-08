@@ -55,6 +55,27 @@ def test_guard_tool_endpoint():
     assert data["is_safe_to_execute"] is False
     assert data["action"] == "QUARANTINE_DENIED"
 
+def test_video_analysis_endpoint():
+    from tests.test_video_forensics import _create_mock_video_bytes
+    video_bytes = _create_mock_video_bytes(num_frames=5)
+    files = {"file": ("test.gif", video_bytes, "image/gif")}
+    res = client.post("/api/forensics/video", files=files)
+    assert res.status_code == 200
+    data = res.json()
+    assert "verdict" in data
+    assert "metrics" in data
+    assert data["metrics"]["frames_analyzed"] == 5
+
+def test_proxy_chat_completions_endpoint():
+    payload = {
+        "model": "aegistruth-sentinel-v1",
+        "messages": [{"role": "user", "content": "What is quantum computing?"}]
+    }
+    res = client.post("/v1/chat/completions", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["choices"][0]["finish_reason"] == "stop"
+
 def test_report_export_html_endpoint():
     manifest = {
         "manifest_signature": "1234567890abcdef",
@@ -76,3 +97,4 @@ def test_report_export_html_endpoint():
     res = client.post("/api/report/export-html", json={"manifest": manifest})
     assert res.status_code == 200
     assert "AEGIS-TRUTH FORENSIC ATTESTATION" in res.text
+

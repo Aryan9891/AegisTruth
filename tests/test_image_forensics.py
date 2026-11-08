@@ -49,3 +49,4 @@ def test_analyze_image_pipeline():
     assert "ela" in results["visualizations"]
     assert "fft_spectrum" in results["visualizations"]
     assert "metrics" in results
+

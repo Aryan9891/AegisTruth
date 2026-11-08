@@ -135,9 +135,53 @@ def generate_sample_texts():
     with open(SAMPLES_DIR / "sample_texts.json", "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
+def generate_sample_videos():
+    """Generates authentic continuous optical motion vs synthetic flickered deepfake sequence."""
+    n_frames = 15
+    w, h = 256, 256
+    
+    # 1. Authentic Video: Smooth, continuous translation of a circle across frames
+    frames_real = []
+    for i in range(n_frames):
+        img = Image.new("RGB", (w, h), color=(30, 40, 60))
+        draw = ImageDraw.Draw(img)
+        # Smoothly moving ball
+        cx = 30 + int(i * 12)
+        cy = 120 + int(10 * math.sin(i * 0.4))
+        draw.ellipse((cx - 20, cy - 20, cx + 20, cy + 20), fill=(56, 189, 248))
+        frames_real.append(np.array(img))
+        
+    import imageio.v3 as iio
+    iio.imwrite(SAMPLES_DIR / "sample_video_real.gif", frames_real, duration=100, loop=0)
+    
+    # 2. Deepfake Video: Random inter-frame edge warping, sharp flicker, and spatial harmonic artifacts
+    frames_fake = []
+    for i in range(n_frames):
+        img = Image.new("RGB", (w, h), color=(30, 40, 60))
+        draw = ImageDraw.Draw(img)
+        # Jittery ball with sudden size changes (temporal warp)
+        jitter_x = np.random.randint(-15, 15) if i % 2 == 0 else 0
+        jitter_y = np.random.randint(-15, 15) if i % 3 == 0 else 0
+        radius = 20 + (15 if i % 3 == 0 else 0)
+        cx = 30 + int(i * 12) + jitter_x
+        cy = 120 + jitter_y
+        draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=(244, 63, 94))
+        
+        # Inject high-frequency lattice noise in alternate frames (upsampler flicker)
+        arr = np.array(img, dtype=np.float32)
+        if i % 2 == 1:
+            y, x = np.ogrid[:h, :w]
+            noise_2d = 25.0 * (np.sin(0.4 * x) * np.sin(0.4 * y))
+            arr += noise_2d[:, :, np.newaxis]
+            
+        frames_fake.append(np.clip(arr, 0, 255).astype(np.uint8))
+        
+    iio.imwrite(SAMPLES_DIR / "sample_video_deepfake.gif", frames_fake, duration=100, loop=0)
+
 if __name__ == "__main__":
     generate_sample_images()
     generate_sample_audio()
     generate_sample_texts()
+    generate_sample_videos()
     print("[*] Sample assets generated successfully in aegistruth/samples/")
 

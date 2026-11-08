@@ -274,3 +274,4 @@ function drawStaticWaveform(wavePoints) {
   });
   ctx.stroke();
 }
+

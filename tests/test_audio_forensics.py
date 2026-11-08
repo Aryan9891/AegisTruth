@@ -51,3 +51,4 @@ def test_analyze_audio_pipeline():
     assert "spectrogram" in results["visualizations"]
     assert "waveform" in results["visualizations"]
     assert "metrics" in results
+

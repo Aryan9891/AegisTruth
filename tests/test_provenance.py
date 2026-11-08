@@ -45,3 +45,4 @@ def test_generate_html_certificate():
     assert "<!DOCTYPE html>" in html
     assert "AEGIS-TRUTH FORENSIC ATTESTATION" in html
     assert "AUTHENTIC" in html
+

@@ -176,3 +176,4 @@ function setLoadingState(elId, isLoading) {
     el.style.display = isLoading ? "block" : "none";
   }
 }
+

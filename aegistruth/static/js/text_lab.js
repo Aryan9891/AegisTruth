@@ -177,3 +177,4 @@ function renderFactResults(data) {
     tableBody.appendChild(tr);
   });
 }
+
