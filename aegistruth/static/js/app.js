@@ -370,10 +370,11 @@ const COMMAND_ACTIONS = [
   { name: "Test Deepfake Video Benchmark", tag: "SAMPLE", action: () => { switchTab("tab-video"); document.getElementById("btn-sample-video-fake").click(); } },
   { name: "Test Voice Clone Audio Benchmark", tag: "SAMPLE", action: () => { switchTab("tab-audio"); document.getElementById("btn-sample-audio-clone").click(); } },
   { name: "Test DAN Prompt Injection Attack", tag: "GUARD", action: () => { switchTab("tab-guard"); document.getElementById("btn-sample-dan").click(); } },
-  { name: "Theme: Cyber Cyan", tag: "THEME", action: () => applyTheme("cyan") },
-  { name: "Theme: Ultraviolet Purple", tag: "THEME", action: () => applyTheme("purple") },
-  { name: "Theme: Matrix Emerald", tag: "THEME", action: () => applyTheme("emerald") },
-  { name: "Theme: Solar Amber", tag: "THEME", action: () => applyTheme("amber") },
+  { name: "Theme: Cyber Cyan (Pinterest Electric HUD)", tag: "THEME", action: () => applyTheme("cyan") },
+  { name: "Theme: Neuromancer Magenta (Synthwave)", tag: "THEME", action: () => applyTheme("purple") },
+  { name: "Theme: Matrix Phosphor (Terminal Green)", tag: "THEME", action: () => applyTheme("emerald") },
+  { name: "Theme: Solar Flare Amber (Tactical SOC)", tag: "THEME", action: () => applyTheme("amber") },
+  { name: "Theme: Monolith Stealth (Titanium Indigo)", tag: "THEME", action: () => applyTheme("monolith") },
 ];
 
 function renderCmdResults(query) {
@@ -432,31 +433,37 @@ function initKeyboardShortcuts() {
   });
 }
 
-// 6. Dynamic Cyberpunk Theme Engine
+// 6. Dynamic Cyberpunk & Sci-Fi HUD Theme Engine (Pinterest Curated)
 const THEMES = {
   cyan: {
-    "--neon-cyan": "#06b6d4",
-    "--border-active": "#06b6d4",
-    "--glow-cyan": "0 0 25px rgba(6, 182, 212, 0.4)",
+    "--neon-cyan": "#00f3ff",
+    "--border-active": "#00f3ff",
+    "--glow-cyan": "0 0 28px rgba(0, 243, 255, 0.45)",
     orb1: "radial-gradient(circle, #0284c7 0%, transparent 70%)"
   },
   purple: {
-    "--neon-cyan": "#c084fc",
-    "--border-active": "#a855f7",
-    "--glow-cyan": "0 0 25px rgba(168, 85, 247, 0.4)",
+    "--neon-cyan": "#ec4899",
+    "--border-active": "#c026d3",
+    "--glow-cyan": "0 0 28px rgba(236, 72, 153, 0.45)",
     orb1: "radial-gradient(circle, #9333ea 0%, transparent 70%)"
   },
   emerald: {
-    "--neon-cyan": "#34d399",
+    "--neon-cyan": "#00ff66",
     "--border-active": "#10b981",
-    "--glow-cyan": "0 0 25px rgba(16, 185, 129, 0.4)",
+    "--glow-cyan": "0 0 28px rgba(0, 255, 102, 0.45)",
     orb1: "radial-gradient(circle, #059669 0%, transparent 70%)"
   },
   amber: {
-    "--neon-cyan": "#fbbf24",
-    "--border-active": "#f59e0b",
-    "--glow-cyan": "0 0 25px rgba(245, 158, 11, 0.4)",
+    "--neon-cyan": "#ffb703",
+    "--border-active": "#ea580c",
+    "--glow-cyan": "0 0 28px rgba(255, 183, 3, 0.45)",
     orb1: "radial-gradient(circle, #d97706 0%, transparent 70%)"
+  },
+  monolith: {
+    "--neon-cyan": "#818cf8",
+    "--border-active": "#6366f1",
+    "--glow-cyan": "0 0 28px rgba(99, 102, 241, 0.45)",
+    orb1: "radial-gradient(circle, #4338ca 0%, transparent 70%)"
   }
 };
 
