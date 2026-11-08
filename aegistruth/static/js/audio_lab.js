@@ -128,60 +128,23 @@ function drawLiveMicWaveform(canvas, analyser) {
 }
 
 async function loadSampleAudio(filename) {
-  // Generate synthetic audio wave in memory
-  const sampleRate = 22050;
-  const duration = 2.0;
-  const numSamples = sampleRate * duration;
-  const buffer = new ArrayBuffer(44 + numSamples * 2);
-  const view = new DataView(buffer);
+  setLoadingState("audio-loading", true);
+  try {
+    const directSample = await fetch(`/static/samples/${filename}`);
+    if (!directSample.ok) throw new Error("Could not fetch sample audio asset");
 
-  // Write simple WAV Header
-  function writeString(offset, string) {
-    for (let i = 0; i < string.length; i++) {
-      view.setUint8(offset + i, string.charCodeAt(i));
-    }
+    const blob = await directSample.blob();
+    await processAudioFile(blob);
+  } catch (err) {
+    alert("Audio sample error: " + err.message);
+  } finally {
+    setLoadingState("audio-loading", false);
   }
-
-  writeString(0, "RIFF");
-  view.setUint32(4, 36 + numSamples * 2, true);
-  writeString(8, "WAVE");
-  writeString(12, "fmt ");
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true); // PCM
-  view.setUint16(22, 1, true); // Mono
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true);
-  view.setUint16(32, 2, true);
-  view.setUint16(34, 16, true);
-  writeString(36, "data");
-  view.setUint32(40, numSamples * 2, true);
-
-  // Generate PCM data
-  let offset = 44;
-  const isClone = filename.includes("clone");
-  for (let i = 0; i < numSamples; i++) {
-    const t = i / sampleRate;
-    let sample = 0;
-    if (isClone) {
-      // Hyper-flat constant pitch 140Hz with dead silence interval
-      if (t > 0.4 && t < 1.6) {
-        sample = Math.sin(2 * Math.PI * 140.0 * t);
-      }
-    } else {
-      // Natural human wave with micro-jitter tremor
-      const jitter = 1.0 + 0.015 * Math.sin(2 * Math.PI * 7.0 * t);
-      sample = 0.6 * Math.sin(2 * Math.PI * 140.0 * t * jitter) + 0.02 * (Math.random() - 0.5);
-    }
-    view.setInt16(offset, Math.max(-1, Math.min(1, sample)) * 32767, true);
-    offset += 2;
-  }
-
-  const blob = new Blob([buffer], { type: "audio/wav" });
-  await processAudioFile(blob);
 }
 
 async function processAudioFile(file) {
   setLoadingState("audio-loading", true);
+  if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
     const formData = new FormData();
     formData.append("file", file, "audio.wav");
@@ -207,6 +170,14 @@ async function processAudioFile(file) {
 
 function renderAudioResults(data) {
   document.getElementById("audio-results-panel").style.display = "block";
+
+  if (data.verdict === "AUTHENTIC_HUMAN") {
+    if (typeof playCyberSound === "function") playCyberSound("success");
+    if (typeof showToast === "function") showToast("Audio verified: Natural Human Speech Biology", "success");
+  } else {
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast(`Acoustic Clone Detected: ${data.verdict}`, "alert");
+  }
 
   // Score & Verdict
   const verdictEl = document.getElementById("audio-verdict-badge");

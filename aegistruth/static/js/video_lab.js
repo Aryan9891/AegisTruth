@@ -45,58 +45,27 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadSampleVideo(filename) {
   setLoadingState("video-loading", true);
   try {
-    // Generate multi-frame gif client-side or send sample request
-    const isFake = filename.includes("deepfake");
+    const directSample = await fetch(`/static/samples/${filename}`);
+    if (!directSample.ok) throw new Error("Could not fetch sample video asset");
     
-    // Create animated canvas frames
-    const frames = [];
-    const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext("2d");
+    const blob = await directSample.blob();
+    const fData = new FormData();
+    fData.append("file", blob, filename);
 
-    for (let i = 0; i < 8; i++) {
-      ctx.fillStyle = "#1e293b";
-      ctx.fillRect(0, 0, 128, 128);
-
-      if (isFake && i % 2 === 1) {
-        ctx.fillStyle = "#f43f5e";
-        ctx.fillRect(30 + Math.random() * 20, 30 + Math.random() * 20, 40, 40);
-      } else {
-        ctx.fillStyle = "#38bdf8";
-        ctx.beginPath();
-        ctx.arc(20 + i * 12, 64, 16, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      frames.push(canvas.toDataURL("image/png"));
-    }
-
-    // Direct API call
     const res = await fetch("/api/forensics/video", {
       method: "POST",
-      body: createDummyVideoBlob(frames),
+      body: fData,
     });
 
     if (!res.ok) {
-      // Fallback to static sample if mock format conversion needs real file
-      const directSample = await fetch(`/static/samples/${filename}`);
-      if (directSample.ok) {
-        const blob = await directSample.blob();
-        const fData = new FormData();
-        fData.append("file", blob, filename);
-        const retryRes = await fetch("/api/forensics/video", { method: "POST", body: fData });
-        const retryData = await retryRes.json();
-        renderVideoResults(retryData);
-        return;
-      }
-      throw new Error("Could not process video sample");
+      const err = await res.json();
+      throw new Error(err.detail || "Video analysis failed");
     }
 
     const data = await res.json();
     renderVideoResults(data);
   } catch (err) {
-    // Fallback demonstration
-    alert("Video sample analyzed. See console for detailed temporal metrics.");
+    alert("Video sample error: " + err.message);
   } finally {
     setLoadingState("video-loading", false);
   }
@@ -216,3 +185,4 @@ function drawTimelineChart(diffs) {
     ctx.fillRect(x, y, Math.max(step - 4, 3), barHeight);
   });
 }
+

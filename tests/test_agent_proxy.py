@@ -46,3 +46,4 @@ def test_proxy_audit_logs_endpoint():
     data = res.json()
     assert "total_intercepted" in data
     assert "logs" in data
+

@@ -1,4 +1,6 @@
-// AegisTruth Visual Forensics Lab (Image & Deepfake Analysis)
+// AegisTruth Visual Forensics Lab (Image & Deepfake Analysis) - Interactive Slider Edition
+
+let isDraggingSlider = false;
 
 document.addEventListener("DOMContentLoaded", () => {
   const dropzone = document.getElementById("image-dropzone");
@@ -40,53 +42,62 @@ document.addEventListener("DOMContentLoaded", () => {
   if (sampleSynthBtn) {
     sampleSynthBtn.addEventListener("click", () => loadSampleImage("sample_synthetic.jpg"));
   }
+
+  initComparisonSlider();
 });
+
+function initComparisonSlider() {
+  const container = document.getElementById("comparison-container");
+  const handle = document.getElementById("comparison-handle");
+  const overlay = document.getElementById("comparison-overlay");
+
+  if (!container || !handle || !overlay) return;
+
+  function setSliderPos(x) {
+    const rect = container.getBoundingClientRect();
+    let pos = (x - rect.left) / rect.width;
+    pos = Math.max(0.02, Math.min(0.98, pos));
+    handle.style.left = `${pos * 100}%`;
+    overlay.style.width = `${pos * 100}%`;
+  }
+
+  handle.addEventListener("mousedown", () => { isDraggingSlider = true; });
+  window.addEventListener("mouseup", () => { isDraggingSlider = false; });
+  window.addEventListener("mousemove", (e) => {
+    if (isDraggingSlider) setSliderPos(e.clientX);
+  });
+
+  // Touch support for mobile/tablet
+  handle.addEventListener("touchstart", () => { isDraggingSlider = true; });
+  window.addEventListener("touchend", () => { isDraggingSlider = false; });
+  window.addEventListener("touchmove", (e) => {
+    if (isDraggingSlider && e.touches.length > 0) {
+      setSliderPos(e.touches[0].clientX);
+    }
+  });
+}
 
 async function loadSampleImage(filename) {
   setLoadingState("image-loading", true);
+  if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
-    // Generate synthetic on canvas or fetch sample
-    const canvas = document.createElement("canvas");
-    canvas.width = 400;
-    canvas.height = 400;
-    const ctx = canvas.getContext("2d");
+    const directSample = await fetch(`/static/samples/${filename}`);
+    if (!directSample.ok) throw new Error("Could not fetch sample image asset");
 
-    if (filename.includes("real")) {
-      // Draw organic gradient landscape
-      const grad = ctx.createLinearGradient(0, 0, 0, 400);
-      grad.addColorStop(0, "#38bdf8");
-      grad.addColorStop(0.6, "#bae6fd");
-      grad.addColorStop(1, "#15803d");
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 400, 400);
-      ctx.fillStyle = "#eab308";
-      ctx.beginPath();
-      ctx.arc(80, 80, 40, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      // Draw synthetic with repetitive grid patterns & sharp inpainting
-      ctx.fillStyle = "#64748b";
-      ctx.fillRect(0, 0, 400, 400);
-      // Periodic checkerboard lines
-      ctx.strokeStyle = "#94a3b8";
-      for (let i = 0; i < 400; i += 8) {
-        ctx.beginPath();
-        ctx.moveTo(i, 0);
-        ctx.lineTo(i, 400);
-        ctx.stroke();
-      }
-      ctx.fillStyle = "#ef4444";
-      ctx.fillRect(140, 140, 120, 120);
-    }
+    const blob = await directSample.blob();
+    const formData = new FormData();
+    formData.append("file", blob, filename);
 
-    const b64 = canvas.toDataURL("image/jpeg", 0.9);
-    const res = await fetch("/api/forensics/image/base64", {
+    const res = await fetch("/api/forensics/image", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image_base64: b64 }),
+      body: formData,
     });
 
-    if (!res.ok) throw new Error("Analysis failed");
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Analysis request failed");
+    }
+
     const data = await res.json();
     renderImageResults(data);
   } catch (err) {
@@ -98,6 +109,7 @@ async function loadSampleImage(filename) {
 
 async function processImageFile(file) {
   setLoadingState("image-loading", true);
+  if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
     const formData = new FormData();
     formData.append("file", file);
@@ -124,7 +136,21 @@ async function processImageFile(file) {
 function renderImageResults(data) {
   document.getElementById("image-results-panel").style.display = "block";
 
-  // Score & Verdict
+  // Play sound according to result
+  if (data.verdict === "AUTHENTIC") {
+    if (typeof playCyberSound === "function") playCyberSound("success");
+    if (typeof showToast === "function") showToast("Image verified as Authentic Camera Capture", "success");
+  } else {
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast(`Visual Deepfake Detected: ${data.verdict}`, "alert");
+  }
+
+  // Update Radial Threat Gauge
+  if (typeof updateRadialGauge === "function") {
+    updateRadialGauge("image-gauge-circle", "image-gauge-score", data.synthetic_probability, true);
+  }
+
+  // Verdict Badge
   const verdictEl = document.getElementById("image-verdict-badge");
   verdictEl.className = "badge-verdict";
   if (data.verdict === "AUTHENTIC") {
@@ -140,7 +166,15 @@ function renderImageResults(data) {
 
   document.getElementById("image-verdict-desc").textContent = data.confidence_description;
 
-  // Visuals
+  // Split slider images
+  const sliderOrig = document.getElementById("slider-img-orig");
+  const sliderEla = document.getElementById("slider-img-ela");
+  if (sliderOrig && sliderEla) {
+    sliderOrig.src = data.visualizations.original;
+    sliderEla.src = data.visualizations.ela;
+  }
+
+  // Visuals in 3-way split
   document.getElementById("img-view-original").src = data.visualizations.original;
   document.getElementById("img-view-ela").src = data.visualizations.ela;
   document.getElementById("img-view-fft").src = data.visualizations.fft_spectrum;
@@ -162,7 +196,7 @@ function renderImageResults(data) {
     });
   } else {
     const li = document.createElement("li");
-    li.textContent = "All visual indicators match organic sensor capture.";
+    li.textContent = "All visual indicators match organic camera sensor capture.";
     reasonsList.appendChild(li);
   }
 
@@ -176,4 +210,3 @@ function setLoadingState(elId, isLoading) {
     el.style.display = isLoading ? "block" : "none";
   }
 }
-

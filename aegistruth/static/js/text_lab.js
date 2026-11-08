@@ -43,6 +43,7 @@ async function runTextForensics() {
   }
 
   setLoadingState("text-loading", true);
+  if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
     const res = await fetch("/api/forensics/text", {
       method: "POST",
@@ -72,6 +73,7 @@ async function runFactChecking() {
   }
 
   setLoadingState("text-loading", true);
+  if (typeof playCyberSound === "function") playCyberSound("scan");
   try {
     const res = await fetch("/api/forensics/text/fact-check", {
       method: "POST",
@@ -96,6 +98,14 @@ async function runFactChecking() {
 function renderTextResults(data) {
   document.getElementById("text-results-panel").style.display = "block";
   document.getElementById("fact-results-panel").style.display = "none";
+
+  if (data.verdict === "LIKELY_HUMAN") {
+    if (typeof playCyberSound === "function") playCyberSound("success");
+    if (typeof showToast === "function") showToast("Text evaluated: Natural Human Prose", "success");
+  } else {
+    if (typeof playCyberSound === "function") playCyberSound("alert");
+    if (typeof showToast === "function") showToast(`Synthetic Text Detected: ${data.verdict}`, "alert");
+  }
 
   // Score & Verdict
   const verdictEl = document.getElementById("text-verdict-badge");

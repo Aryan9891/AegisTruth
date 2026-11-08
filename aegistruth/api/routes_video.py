@@ -23,3 +23,4 @@ async def forensic_video_upload(file: UploadFile = File(...)):
         return results
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Video forensic analysis failed: {str(e)}")
+

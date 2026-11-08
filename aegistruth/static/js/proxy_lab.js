@@ -116,3 +116,4 @@ async function fetchProxyLogs() {
     console.warn("Could not fetch proxy logs:", err);
   }
 }
+

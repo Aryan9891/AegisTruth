@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "AegisTruth Cognitive Sentinel",
+  "version": "1.0.0",
+  "description": "Real-time deepfake, voice clone, and AI misinformation verification in your browser.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["http://127.0.0.1:8000/*", "http://localhost:8000/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AegisTruth Sentinel"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}
+

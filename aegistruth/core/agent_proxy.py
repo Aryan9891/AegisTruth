@@ -163,3 +163,4 @@ async def process_chat_completion(
             "content_hash": compute_content_hashes(model_output_content.encode("utf-8"))["sha256"]
         }
     }
+
