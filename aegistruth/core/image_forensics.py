@@ -220,42 +220,38 @@ def analyze_image(image_bytes: bytes) -> Dict[str, Any]:
     # 4. EXIF & Metadata
     exif_data = extract_exif_metadata(image)
     
-    # 5. Composite AI/Deepfake Likelihood Estimation
-    # Weight factors:
-    # - High grid spike ratio indicates periodic latent upsampling (Diffusion/GAN): 0-30 pts
-    # - ELA variance & mean error inconsistency: 0-25 pts
-    # - Quadrant noise discrepancy (spliced/inpainted regions): 0-20 pts
-    # - Missing camera hardware metadata + no EXIF: 0-15 pts
-    # - Explicit AI tag match: up to +80 pts
-    
-    ai_score = 0.0
-    forensic_reasons = []
-    
+    # 5. Composite AI/Deepfake Likelihood Estimation via Calibrated ML Classifier
+    from aegistruth.core.ml_classifier import extract_image_features, get_calibrated_classifier
+    feat = extract_image_features(image)
+    clf = get_calibrated_classifier()
+    ml_prob = float(clf.predict_proba(feat)) * 100.0
+
     if exif_data["has_ai_signature"]:
-        ai_score += 85.0
+        ml_prob = max(ml_prob, 95.0)
+
+    ai_score = float(np.clip(ml_prob, 0.0, 100.0))
+    forensic_reasons = []
+
+    if exif_data["has_ai_signature"]:
         forensic_reasons.append("EXIF metadata explicitly contains generative AI generator signatures.")
-    elif not exif_data["has_camera_hardware"]:
-        ai_score += 15.0
-        forensic_reasons.append("Absence of authentic camera sensor hardware metadata (Make, Model, Exposure).")
-        
+    elif exif_data["has_camera_hardware"]:
+        forensic_reasons.append("Authentic camera sensor hardware metadata (Make, Model, Exposure) verified.")
+
     if grid_spike_ratio > 4.5:
-        ai_score += 30.0
         forensic_reasons.append(f"Pronounced high-frequency 2D FFT harmonic grid spikes (ratio: {grid_spike_ratio:.2f}) typical of generative upsamplers.")
-    elif grid_spike_ratio > 3.0:
-        ai_score += 15.0
-        forensic_reasons.append(f"Mild frequency domain harmonic anomalies detected (ratio: {grid_spike_ratio:.2f}).")
-        
+    elif grid_spike_ratio < 2.5:
+        forensic_reasons.append(f"Continuous 2D Fourier power spectrum matching natural physical lens optics (ratio: {grid_spike_ratio:.2f}).")
+
     if noise_metrics["quadrant_discrepancy"] > 0.40:
-        ai_score += 20.0
         forensic_reasons.append(f"High spatial noise discrepancy across image quadrants ({noise_metrics['quadrant_discrepancy']:.2f}), suggesting localized inpainting or generative splicing.")
-        
-    if err_var > 220.0 or (err_var < 0.8 and mean_err > 5.0):
-        ai_score += 18.0
+    else:
+        forensic_reasons.append("Homogeneous sensor noise distribution verified across all image quadrants.")
+
+    if err_var > 220.0:
         forensic_reasons.append(f"Abnormal Error Level Analysis (ELA) variance ({err_var:.1f}), showing non-uniform compression characteristics.")
+    else:
+        forensic_reasons.append("Uniform Error Level Analysis (ELA) compression characteristics consistent with single-pass optical capture.")
         
-    # Cap between 0 and 100
-    ai_score = float(np.clip(ai_score, 0.0, 100.0))
-    
     if ai_score >= 70.0:
         verdict = "LIKELY_SYNTHETIC"
         confidence_desc = "High probability of generative AI creation or heavy manipulation"

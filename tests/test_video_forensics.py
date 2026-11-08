@@ -67,3 +67,42 @@ def test_analyze_video_static_image_upload():
     assert res["verdict"] in ["AUTHENTIC_RECORDING", "SUSPICIOUS_TEMPORAL_ANOMALY", "LIKELY_DEEPFAKE_VIDEO"]
     assert res["metrics"]["frames_analyzed"] == 1
     assert "Single static frame" in res["forensic_reasons"][0]
+
+
+def test_analyze_video_camera_recording_authentic():
+    # Simulate real camera video with continuous optical flow and CMOS sensor noise
+    np.random.seed(42)
+    scene = np.random.randint(60, 200, (128, 160, 3), dtype=np.uint8)
+    sensor = np.random.normal(0, 3.0, (128, 160, 3))
+    real_frames = []
+    for i in range(10):
+        f = np.roll(scene, i * 2, axis=1).astype(np.float64) + sensor + np.random.normal(0, 0.8, (128, 160, 3))
+        real_frames.append(np.clip(f, 0, 255).astype(np.uint8))
+
+    buf = io.BytesIO()
+    iio.imwrite(buf, np.array(real_frames), extension=".mp4", fps=24)
+    raw_video = buf.getvalue()
+
+    res = analyze_video(raw_video, filename="VID_20261108_camera.mp4")
+    assert res["verdict"] == "AUTHENTIC_RECORDING"
+    assert res["synthetic_probability"] < 25.0
+    assert any("continuous" in r.lower() or "camera" in r.lower() or "optical" in r.lower() for r in res["forensic_reasons"])
+
+
+def test_analyze_video_samples_classification():
+    from pathlib import Path
+    samples_dir = Path("aegistruth/static/samples")
+    real_gif = samples_dir / "sample_video_real.gif"
+    fake_gif = samples_dir / "sample_video_deepfake.gif"
+
+    if real_gif.exists():
+        with open(real_gif, "rb") as f:
+            res_real = analyze_video(f.read(), filename="sample_video_real.gif")
+        assert res_real["verdict"] == "AUTHENTIC_RECORDING"
+        assert res_real["synthetic_probability"] < 35.0
+
+    if fake_gif.exists():
+        with open(fake_gif, "rb") as f:
+            res_fake = analyze_video(f.read(), filename="sample_video_deepfake.gif")
+        assert res_fake["verdict"] == "LIKELY_DEEPFAKE_VIDEO"
+        assert res_fake["synthetic_probability"] > 65.0

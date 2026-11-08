@@ -76,3 +76,42 @@ def test_benchmark_evaluation():
     assert metrics["recall"] >= 0.90
     assert metrics["f1_score"] >= 0.90
 
+
+def test_video_classifier_fit_and_predict():
+    from aegistruth.core.ml_classifier import CalibratedVideoClassifier, VIDEO_FEATURE_NAMES, get_calibrated_video_classifier
+    from aegistruth.core.train_forensic_classifier import generate_video_benchmark_dataset
+
+    clf = CalibratedVideoClassifier()
+    X, y = generate_video_benchmark_dataset(num_samples=400, random_seed=42)
+    fit_res = clf.fit(X, y, l2_reg=0.01)
+
+    assert fit_res["converged"] is True
+    assert fit_res["accuracy"] > 0.95
+    assert fit_res["samples_trained"] == 400
+
+    probs = clf.predict_proba(X[:10])
+    assert probs.shape == (10,)
+    assert np.all((probs >= 0.0) & (probs <= 1.0))
+
+    expl = clf.explain(X[0])
+    assert len(expl) == len(VIDEO_FEATURE_NAMES)
+    assert expl[0]["indicates"] in ["SYNTHETIC", "AUTHENTIC"]
+
+
+def test_video_classifier_save_load(tmp_path):
+    from aegistruth.core.ml_classifier import CalibratedVideoClassifier
+    from aegistruth.core.train_forensic_classifier import generate_video_benchmark_dataset
+
+    clf = CalibratedVideoClassifier()
+    X, y = generate_video_benchmark_dataset(num_samples=200, random_seed=15)
+    clf.fit(X, y)
+
+    target = tmp_path / "video_weights.json"
+    clf.save(target)
+    assert target.exists()
+
+    loaded = CalibratedVideoClassifier.load(target)
+    np.testing.assert_allclose(clf.weights, loaded.weights)
+    assert clf.bias == loaded.bias
+    np.testing.assert_allclose(clf.predict_proba(X[:5]), loaded.predict_proba(X[:5]))
+

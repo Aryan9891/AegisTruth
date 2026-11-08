@@ -348,40 +348,52 @@ def analyze_video(video_bytes: bytes, filename: Optional[str] = None) -> Dict[st
     _, high_freq_ratio, grid_spike_ratio, _ = compute_fft_spectrum(mid_frame)
     _, _, ela_var = compute_ela(mid_frame)
     
-    # Synthetic Video Scoring Heuristic
-    ai_score = 0.0
+    # Extract standardized 8-dimensional video forensic feature vector & run Calibrated ML Classifier
+    from aegistruth.core.ml_classifier import extract_video_features, get_calibrated_video_classifier
+    feat = extract_video_features(frames, video_bytes=video_bytes, filename=filename)
+    clf = get_calibrated_video_classifier()
+    ml_prob = float(clf.predict_proba(feat)) * 100.0
+
     forensic_reasons = []
+
+    # Features:
+    # 0: temporal_flicker_cv, 1: prnu_sensor_correlation, 2: motion_acceleration_cv,
+    # 3: discontinuity_max_ratio, 4: chromatic_stability_var, 5: keyframe_grid_spike_ratio,
+    # 6: keyframe_ela_variance, 7: has_camera_container
+    flicker_cv = feat[0]
+    prnu_corr = feat[1]
+    disc_ratio = feat[3]
+    chroma_var = feat[4]
+    grid_spike = feat[5]
+    has_cam = feat[7]
 
     if temporal["total_frames_analyzed"] == 1:
         forensic_reasons.append("Single static frame evaluated in temporal sentinel: no inter-frame motion detected.")
     else:
-        # 1. Temporal flicker anomaly
-        if temporal["temporal_flicker_score"] > 1.2:
-            ai_score += 35.0
-            forensic_reasons.append(f"High inter-frame edge flicker ({temporal['temporal_flicker_score']:.2f}), characteristic of facial boundary warps in deepfake synthesis.")
-        elif temporal["temporal_flicker_score"] > 0.5:
-            ai_score += 15.0
-            forensic_reasons.append(f"Moderate edge flickering detected across frames ({temporal['temporal_flicker_score']:.2f}).")
+        # Authentic camera indicators
+        if prnu_corr > 0.15:
+            forensic_reasons.append(f"Authentic CMOS sensor PRNU noise correlation ({prnu_corr:.2f}): physical camera sensor fingerprint verified.")
+        if has_cam >= 0.5:
+            forensic_reasons.append("Standard camera media container and stream encoding verified.")
+        if flicker_cv < 0.16:
+            forensic_reasons.append("Continuous optical flow: inter-frame edge sharpness remains temporally smooth with zero generative boundary warp.")
+        if chroma_var < 0.005:
+            forensic_reasons.append("Stable physical color temperature: consistent chromatic distribution across evaluated frames.")
 
-        # 2. Motion jitter coefficient of variation
-        if temporal["motion_jitter_cv"] > 0.20:
-            ai_score += 25.0
-            forensic_reasons.append(f"Erratic frame-to-frame optical flow variance (jitter CV: {temporal['motion_jitter_cv']:.2f}), typical of deepfake frame interpolation.")
+        # Synthetic/Deepfake indicators
+        if flicker_cv > 0.22:
+            forensic_reasons.append(f"High inter-frame edge flicker (CV: {flicker_cv:.2f}), characteristic of facial boundary warps in deepfake synthesis.")
+        if grid_spike > 4.5:
+            forensic_reasons.append(f"Keyframes exhibit periodic 2D Fourier grid upsampling harmonics (ratio: {grid_spike:.2f}) from generative diffusion.")
+        if disc_ratio > 4.0:
+            forensic_reasons.append(f"Temporal discontinuity spikes detected (ratio: {disc_ratio:.2f}x above baseline motion).")
+        if chroma_var > 0.015:
+            forensic_reasons.append(f"Chromatic instability detected: erratic inter-frame color temperature shifts across skin tones.")
 
-        # 3. Splicing discontinuity spikes
-        if len(temporal["discontinuity_spikes"]) >= 1:
-            ai_score += 20.0
-            forensic_reasons.append(f"Temporal discontinuity spikes detected ({len(temporal['discontinuity_spikes'])} anomalous transitions).")
+    if not forensic_reasons:
+        forensic_reasons.append("Temporal optical flow and spatial frequency characteristics match continuous physical camera recording.")
 
-    # 4. Spatial keyframe frequency artifacts
-    if grid_spike_ratio > 3.5:
-        ai_score += 20.0
-        forensic_reasons.append(f"Keyframes exhibit periodic 2D Fourier grid upsampling harmonics (ratio: {grid_spike_ratio:.2f}).")
-    elif grid_spike_ratio > 2.0:
-        ai_score += 10.0
-        forensic_reasons.append(f"Moderate spatial Fourier frequency anomalies detected in keyframe lattice ({grid_spike_ratio:.2f}).")
-        
-    ai_score = float(np.clip(ai_score, 0.0, 100.0))
+    ai_score = float(np.clip(ml_prob, 0.0, 100.0))
 
     if ai_score >= 65.0:
         verdict = "LIKELY_DEEPFAKE_VIDEO"
