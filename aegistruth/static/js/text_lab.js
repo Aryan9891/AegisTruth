@@ -8,6 +8,50 @@ document.addEventListener("DOMContentLoaded", () => {
   const sampleContraBtn = document.getElementById("btn-sample-text-contra");
   const textarea = document.getElementById("text-input");
 
+  const dropzone = document.getElementById("text-dropzone");
+  const fileInput = document.getElementById("text-file-input");
+
+  if (dropzone && fileInput) {
+    dropzone.addEventListener("click", () => fileInput.click());
+
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("dragover");
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("dragover");
+      if (e.dataTransfer.files.length > 0) {
+        handleTextDocFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        handleTextDocFile(fileInput.files[0]);
+      }
+    });
+  }
+
+  function handleTextDocFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      textarea.value = e.target.result;
+      textarea.focus();
+      if (typeof playCyberSound === "function") playCyberSound("click");
+    };
+    reader.onerror = () => {
+      alert("Failed to read document file: " + file.name);
+    };
+    reader.readAsText(file);
+  }
+
   if (sampleHumanBtn) {
     sampleHumanBtn.addEventListener("click", () => {
       textarea.value = "Honestly, we never expected the results to look like this. After three weeks of sleepless nights debugging the network stack, the latency finally plummeted. It wasn't clean code by any stretch—more like a duct-tape miracle. But tomorrow morning, we ship it anyway, whatever happens.";

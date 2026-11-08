@@ -9,8 +9,10 @@ from scipy import ndimage
 from aegistruth.config import settings
 
 def _image_to_base64(img: Image.Image, format: str = "PNG") -> str:
-    """Helper to convert PIL Image to base64 data URI."""
+    """Helper to convert PIL Image to base64 data URI, normalizing color modes."""
     buffered = io.BytesIO()
+    if img.mode not in ("RGB", "RGBA", "L"):
+        img = img.convert("RGB")
     img.save(buffered, format=format)
     encoded = base64.b64encode(buffered.getvalue()).decode("utf-8")
     return f"data:image/{format.lower()};base64,{encoded}"
@@ -200,6 +202,8 @@ def analyze_image(image_bytes: bytes) -> Dict[str, Any]:
     Returns composite score, forensic visualizations, and granular evidentiary metrics.
     """
     image = Image.open(io.BytesIO(image_bytes))
+    if image.mode not in ("RGB", "L"):
+        image = image.convert("RGB")
     orig_b64 = _image_to_base64(image)
     
     # 1. Error Level Analysis

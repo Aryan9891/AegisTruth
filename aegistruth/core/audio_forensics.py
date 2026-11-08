@@ -8,6 +8,10 @@ import numpy as np
 from PIL import Image, ImageDraw
 from scipy import signal
 from scipy.io import wavfile
+try:
+    import soundfile as sf
+except ImportError:
+    sf = None
 from aegistruth.config import settings
 
 def _generate_spectrogram_image(stft_mag_db: np.ndarray) -> str:
@@ -43,7 +47,26 @@ def _generate_spectrogram_image(stft_mag_db: np.ndarray) -> str:
     return f"data:image/png;base64,{encoded}"
 
 def decode_audio_bytes(audio_bytes: bytes) -> Tuple[np.ndarray, int]:
-    """Decodes raw audio bytes (PCM WAV) into mono float32 numpy array and sample rate."""
+    """
+    Decodes audio bytes into a mono float32 numpy array and sample rate.
+    Supports ALL audio formats (WAV, MP3, FLAC, OGG, AIFF, AU, etc.).
+    """
+    # 1. Primary multi-format decoder via SoundFile (supports WAV, MP3, FLAC, OGG, AIFF)
+    if sf is not None:
+        try:
+            data, sample_rate = sf.read(io.BytesIO(audio_bytes), dtype="float32")
+            if len(data.shape) > 1:
+                data = np.mean(data, axis=1)
+            # Ensure float32 normalized between -1.0 and 1.0
+            data = data.astype(np.float32)
+            max_val = np.max(np.abs(data))
+            if max_val > 1.0:
+                data = data / max_val
+            return data, sample_rate
+        except Exception:
+            pass
+
+    # 2. Secondary fallback via scipy.io.wavfile
     try:
         sample_rate, data = wavfile.read(io.BytesIO(audio_bytes))
         # Convert stereo to mono
@@ -65,7 +88,7 @@ def decode_audio_bytes(audio_bytes: bytes) -> Tuple[np.ndarray, int]:
                 
         return data, sample_rate
     except Exception as e:
-        # Fallback to standard wave module
+        # 3. Tertiary fallback to standard wave module
         try:
             with wave.open(io.BytesIO(audio_bytes), "rb") as wf:
                 sample_rate = wf.getframerate()
@@ -77,7 +100,7 @@ def decode_audio_bytes(audio_bytes: bytes) -> Tuple[np.ndarray, int]:
                     data = data[::channels]
                 return data, sample_rate
         except Exception:
-            raise ValueError(f"Could not decode audio data: {str(e)}")
+            raise ValueError(f"Could not decode audio data in any supported format (WAV, MP3, FLAC, OGG, AIFF): {str(e)}")
 
 def compute_spectral_features(samples: np.ndarray, sample_rate: int) -> Dict[str, Any]:
     """Computes STFT, spectral centroid, spectral flux, and vocoder truncation artifacts."""

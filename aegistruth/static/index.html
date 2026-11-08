@@ -290,8 +290,8 @@
         <div class="dropzone" id="image-dropzone">
           <div class="dropzone-icon">&#x1F4E5;</div>
           <div style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Drop image here or click to browse</div>
-          <div style="font-size: 12px; color: var(--text-tertiary);">Supports JPEG, PNG, WebP (up to 50 MB)</div>
-          <input type="file" id="image-file-input" accept="image/*" style="display: none;">
+          <div style="font-size: 12px; color: var(--text-tertiary);">Supports ALL image formats: JPG, PNG, WebP, AVIF, HEIC, TIFF, BMP, GIF, SVG, ICO (up to 50 MB)</div>
+          <input type="file" id="image-file-input" accept="image/*,.jpg,.jpeg,.png,.webp,.bmp,.tiff,.tif,.gif,.avif,.heic,.heif,.svg,.ico,.raw,.cr2,.nef,.dng,.ppm,.tga" style="display: none;">
         </div>
 
         <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center; flex-wrap: wrap;">
@@ -400,9 +400,9 @@
 
         <div class="dropzone" id="video-dropzone">
           <div class="dropzone-icon">&#x1F3AC;</div>
-          <div style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Drop video file here (GIF, MP4, WebM)</div>
-          <div style="font-size: 12px; color: var(--text-tertiary);">Extracts and tracks temporal motion continuity</div>
-          <input type="file" id="video-file-input" accept="video/*,image/gif" style="display: none;">
+          <div style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Drop video or animation here or click to browse</div>
+          <div style="font-size: 12px; color: var(--text-tertiary);">Supports ALL video &amp; animation formats: MP4, WebM, MOV, AVI, MKV, FLV, WMV, M4V, 3GP, TS, GIF, APNG (up to 100 MB)</div>
+          <input type="file" id="video-file-input" accept="video/*,image/gif,image/webp,image/apng,.mp4,.mkv,.avi,.mov,.webm,.flv,.wmv,.m4v,.3gp,.ts,.ogv,.gif" style="display: none;">
         </div>
 
         <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center; flex-wrap: wrap;">
@@ -484,9 +484,9 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <div class="dropzone" id="audio-dropzone">
             <div class="dropzone-icon">&#x1F4FB;</div>
-            <div style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Drop audio file here (WAV)</div>
-            <div style="font-size: 12px; color: var(--text-tertiary);">Supports uncompressed PCM audio</div>
-            <input type="file" id="audio-file-input" accept="audio/*" style="display: none;">
+            <div style="font-weight: 700; font-size: 15px; margin-bottom: 6px;">Drop audio file here or click to browse</div>
+            <div style="font-size: 12px; color: var(--text-tertiary);">Supports ALL audio formats: WAV, MP3, FLAC, OGG, AAC, M4A, OPUS, AIFF, WMA, AU, CAF (up to 50 MB)</div>
+            <input type="file" id="audio-file-input" accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a,.aac,.wma,.opus,.aiff,.aif,.au,.caf,.w64" style="display: none;">
           </div>
 
           <div class="glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
@@ -572,6 +572,15 @@
         <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 22px;">
           Evaluate text for LLM synthetic generation (burstiness, perplexity proxy, cliches) OR decompose into propositional claims to detect internal contradictions and hallucinations.
         </p>
+
+        <div class="dropzone" id="text-dropzone" style="padding: 14px 20px; margin-bottom: 14px; text-align: center;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;">
+            <span style="font-size: 20px;">📄</span>
+            <span style="font-weight: 700; font-size: 13.5px;">Drop document or click to browse</span>
+            <span style="font-size: 12px; color: var(--text-tertiary);">(Supports ALL text formats: .txt, .md, .json, .csv, .log, .rtf, .html, .xml, .py, .js)</span>
+          </div>
+          <input type="file" id="text-file-input" accept=".txt,.md,.json,.csv,.rtf,.log,.html,.xml,.py,.js,.sh,.ts,.jsonl,text/*" style="display: none;">
+        </div>
 
         <textarea id="text-input" rows="5" placeholder="Enter text, article, email, or AI output to inspect..."></textarea>
 

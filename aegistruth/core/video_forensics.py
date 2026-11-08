@@ -1,6 +1,8 @@
 """Video & Temporal Deepfake Forensics: Frame-to-frame inconsistency, flickering, and warping."""
 
 import io
+import os
+import tempfile
 import base64
 from typing import Dict, Any, List, Tuple
 import numpy as np
@@ -9,8 +11,11 @@ import imageio.v3 as iio
 from aegistruth.core.image_forensics import compute_fft_spectrum, compute_ela
 
 def extract_video_frames(video_bytes: bytes, max_frames: int = 30) -> List[np.ndarray]:
-    """Decodes video/animated media bytes into a list of RGB numpy frames."""
-    # First attempt: PIL ImageSequence (handles animated GIF, APNG, WebP, TIFF)
+    """
+    Decodes video/animated media bytes into a list of RGB numpy frames.
+    Supports ALL animated and video formats (GIF, WebP, APNG, MP4, MKV, AVI, MOV, WebM, FLV, WMV, etc.).
+    """
+    # 1. First attempt: PIL ImageSequence (handles animated GIF, APNG, WebP, multi-page TIFF)
     try:
         im = Image.open(io.BytesIO(video_bytes))
         n_frames = getattr(im, "n_frames", 1)
@@ -23,7 +28,7 @@ def extract_video_frames(video_bytes: bytes, max_frames: int = 30) -> List[np.nd
     except Exception:
         pass
 
-    # Second attempt: imageio iterator for MP4, WebM, AVI, etc.
+    # 2. Second attempt: imageio iterator directly on in-memory bytes
     try:
         frames = []
         for idx, frame in enumerate(iio.imiter(io.BytesIO(video_bytes))):
@@ -34,12 +39,39 @@ def extract_video_frames(video_bytes: bytes, max_frames: int = 30) -> List[np.nd
             elif frame.shape[2] == 4:
                 frame = frame[:, :, :3]
             frames.append(frame)
-        if frames:
+        if len(frames) >= 2:
             return frames
     except Exception:
         pass
 
-    raise ValueError("Could not extract frames from video asset (unsupported format or single static frame)")
+    # 3. Third attempt: write to temporary file to assist container demuxing for complex video formats
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+            tmp.write(video_bytes)
+            tmp_path = tmp.name
+
+        frames = []
+        for idx, frame in enumerate(iio.imiter(tmp_path)):
+            if idx >= max_frames:
+                break
+            if len(frame.shape) == 2:
+                frame = np.stack([frame] * 3, axis=-1)
+            elif frame.shape[2] == 4:
+                frame = frame[:, :, :3]
+            frames.append(frame)
+        if len(frames) >= 2:
+            return frames
+    except Exception:
+        pass
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.remove(tmp_path)
+            except Exception:
+                pass
+
+    raise ValueError("Could not extract frames from video asset (unsupported format or file contains only a single static frame)")
 
 def compute_temporal_consistency(frames: List[np.ndarray]) -> Dict[str, Any]:
     """
