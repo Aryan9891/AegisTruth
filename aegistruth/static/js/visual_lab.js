@@ -203,6 +203,9 @@ function renderImageResults(data) {
 
   document.getElementById("image-verdict-desc").textContent = data.confidence_description;
 
+  // Store visualizations globally for lens switching
+  window.activeVisualizations = data.visualizations;
+
   // Split slider images
   const sliderOrig = document.getElementById("slider-img-orig");
   const sliderEla = document.getElementById("slider-img-ela");
@@ -247,3 +250,24 @@ function setLoadingState(elId, isLoading) {
     el.style.display = isLoading ? "block" : "none";
   }
 }
+
+window.switchComparisonLens = function(lensType) {
+  const sliderEla = document.getElementById("slider-img-ela");
+  const title = document.getElementById("slider-lens-title");
+  if (!sliderEla || !window.activeVisualizations) return;
+
+  if (lensType === "ela") {
+    sliderEla.src = window.activeVisualizations.ela;
+    if (title) title.textContent = "Original vs ELA Compression Heatmap";
+  } else if (lensType === "fft") {
+    sliderEla.src = window.activeVisualizations.fft_spectrum;
+    if (title) title.textContent = "Original vs 2D Fourier (FFT) Spatial Spectrum";
+  }
+
+  // Update button active state
+  document.querySelectorAll(".lens-mode-pill").forEach(p => p.classList.remove("active"));
+  const activeBtn = document.getElementById(`btn-lens-${lensType}`);
+  if (activeBtn) activeBtn.classList.add("active");
+
+  if (typeof playCyberSound === "function") playCyberSound("click");
+};

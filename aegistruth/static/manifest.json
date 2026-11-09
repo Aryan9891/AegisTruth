@@ -1,0 +1,24 @@
+{
+  "name": "AegisTruth Cognitive Sentinel",
+  "short_name": "AegisTruth",
+  "description": "Autonomous Multi-Modal Deepfake & Cognitive Forensics Sentinel",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "demo_thumbnail.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg"
+    }
+  ],
+  "categories": ["security", "productivity", "utilities"]
+}

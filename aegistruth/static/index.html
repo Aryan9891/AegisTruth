@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>AegisTruth | Autonomous Multi-Modal AI Forensics &amp; Cognitive Defense</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
@@ -154,6 +155,12 @@
         </div>
 
         <div class="workspace-header-right">
+          <button id="btn-toggle-bg-canvas" class="shortcut-pill" title="Toggle background visual matrix mode">
+            &#x1F30C; BG: Synapse Mesh
+          </button>
+          <button id="btn-pwa-install" class="shortcut-pill" style="display:none; color:var(--neon-emerald); border-color:var(--neon-emerald);" title="Install AegisTruth Native App">
+            &#x1F4E5; Install App
+          </button>
           <div id="engine-mode-badge" class="shortcut-pill" style="color: var(--neon-cyan); border-color: rgba(0,243,255,0.3); font-weight: 700;">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--neon-cyan);margin-right:6px;box-shadow:0 0 8px var(--neon-cyan);"></span>
             Web Sentinel Mode
@@ -182,6 +189,44 @@
         <button class="btn-primary" id="btn-run-full-benchmark">
           &#x26A1; Run Full Multi-Modal Diagnostic Suite
         </button>
+      </div>
+
+      <!-- High-Tech Hero Walkthrough & Quick Launch Banner -->
+      <div class="hero-walkthrough-banner">
+        <div class="hero-banner-content">
+          <div class="hero-badge-row">
+            <span class="cyber-badge-neon">1080P MASTERCLASS</span>
+            <span class="cyber-badge-amber">VOICEOVER + SUBTITLES</span>
+            <span class="cyber-badge-emerald">100% IN-BROWSER / ZERO DATA LEAKAGE</span>
+          </div>
+          <h2 class="hero-banner-title">
+            Autonomous Multi-Modal Deepfake &amp; Cognitive Forensics Sentinel
+          </h2>
+          <p class="hero-banner-desc">
+            Decompose synthetic media with sub-second error-level recompression, 2D Fourier spatial harmonics, CMOS PRNU sensor residuals, temporal video optical continuity, and vocal cord micro-jitter analysis.
+          </p>
+          <div class="hero-banner-actions">
+            <button id="btn-open-video-theater" class="btn-primary btn-glow-cyan" onclick="openVideoTheaterModal()">
+              <span>&#x25B6;</span> Watch 1080p Interactive Walkthrough
+            </button>
+            <button class="btn-secondary" onclick="switchTab('tab-visual'); setTimeout(launchWebcamSentinel, 100);">
+              <span>&#x1F4F7;</span> Launch Live Webcam Sentinel
+            </button>
+            <button class="btn-secondary" onclick="switchTab('tab-audio'); setTimeout(launchMicSentinel, 100);">
+              <span>&#x1F3A4;</span> Launch Live Mic Sentinel
+            </button>
+            <a href="downloads/aegistruth-browser-extension.zip" class="btn-secondary" download="aegistruth-browser-extension.zip">
+              <span>&#x1F4E6;</span> Chrome Extension (.zip)
+            </a>
+          </div>
+        </div>
+        <div class="hero-banner-preview" onclick="openVideoTheaterModal()">
+          <img src="demo_thumbnail.jpg" alt="AegisTruth Video Walkthrough" class="hero-preview-thumb">
+          <div class="hero-play-overlay">
+            <div class="hero-play-btn">&#x25B6;</div>
+            <div class="hero-play-time">1:40 &bull; 1080p HD</div>
+          </div>
+        </div>
       </div>
 
       <!-- Telemetry Cards Grid -->
@@ -313,6 +358,39 @@
           <span style="font-size: 13px; color: var(--text-secondary);">Test with verified benchmarks:</span>
           <button class="btn-secondary" id="btn-sample-image-real">&#x1F33F; Natural Optical Camera Capture</button>
           <button class="btn-secondary" id="btn-sample-image-synth">&#x1F916; Synthetic AI Image (Lattice Artifacts)</button>
+          <button class="btn-primary" id="btn-toggle-webcam-visual" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: none; padding: 6px 14px; font-size: 12.5px;">
+            <span>&#x1F4F7;</span> Live Biometric Webcam Sentinel
+          </button>
+        </div>
+
+        <!-- Live Biometric Webcam Sentinel HUD Panel -->
+        <div id="webcam-sentinel-panel" class="webcam-sentinel-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 13px; font-family: 'JetBrains Mono', monospace; color: var(--neon-cyan); font-weight: 700;">
+              &#x1F4F7; LIVE BIOMETRIC SCANNER &bull; REAL-TIME OPTICAL FLOW &amp; JITTER
+            </div>
+            <button class="btn-secondary" id="btn-close-webcam" style="padding: 4px 10px; font-size: 11px;">Close Camera</button>
+          </div>
+
+          <div class="webcam-view-wrapper">
+            <video id="webcam-video-feed" class="webcam-video-el" autoplay playsinline muted></video>
+            <canvas id="webcam-canvas-hud" class="webcam-canvas-overlay"></canvas>
+            <div class="webcam-reticle-box"></div>
+            <div class="webcam-hud-header">
+              <span id="webcam-fps-counter">FPS: 30.0</span>
+              <span id="webcam-resolution-tag">1080P HUD</span>
+              <span id="webcam-status-pill">&#x25CF; STREAM ACTIVE</span>
+            </div>
+            <div class="webcam-hud-footer">
+              <span id="webcam-jitter-val">OPTICAL JITTER: 0.012 px/f (NATURAL)</span>
+              <span id="webcam-auth-score">BIOMETRIC AUTH: 99.4% REAL</span>
+            </div>
+          </div>
+
+          <div class="webcam-actions-bar">
+            <button class="btn-primary" id="btn-capture-webcam-frame">&#x1F4F8; Freeze Frame &amp; Run Deep ELA/FFT Scan</button>
+            <button class="btn-secondary" id="btn-record-webcam-clip">&#x1F3AC; Record 5s Video Motion Scan</button>
+          </div>
         </div>
 
         <div id="image-loading" style="display: none; margin-top: 20px; color: var(--neon-cyan); font-weight: 600;">
@@ -342,9 +420,15 @@
 
           <!-- Interactive Split-Screen Comparison Slider -->
           <div style="margin-bottom: 28px; text-align: center;">
-            <h4 style="font-size: 13px; font-family: 'JetBrains Mono', monospace; color: var(--neon-cyan); margin-bottom: 12px; text-transform: uppercase;">
-              &#x2194; Interactive Split Slider: Original vs ELA Compression Heatmap
-            </h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <h4 id="slider-lens-title" style="font-size: 13px; font-family: 'JetBrains Mono', monospace; color: var(--neon-cyan); text-transform: uppercase;">
+                &#x2194; Interactive Split Slider: Original vs ELA Compression Heatmap
+              </h4>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="btn-lens-ela" class="lens-mode-pill active shortcut-pill" onclick="switchComparisonLens('ela')">ELA Heatmap</button>
+                <button type="button" id="btn-lens-fft" class="lens-mode-pill shortcut-pill" onclick="switchComparisonLens('fft')">2D Fourier (FFT)</button>
+              </div>
+            </div>
             <div class="comparison-slider-container" id="comparison-container">
               <img id="slider-img-orig" alt="Original Image">
               <div class="comparison-overlay" id="comparison-overlay">
@@ -504,10 +588,46 @@
             <input type="file" id="audio-file-input" accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a,.aac,.wma,.opus,.aiff,.aif,.au,.caf,.w64" style="display: none;">
           </div>
 
-          <div class="glass-panel" style="padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-            <div style="font-size: 13px; font-family: 'JetBrains Mono', monospace; color: var(--neon-cyan); margin-bottom: 12px;">Live Audio Call / Microphone Sentinel</div>
-            <canvas id="mic-live-waveform" class="waveform-canvas" width="400" height="90" style="margin-bottom: 14px;"></canvas>
-            <button class="btn-primary" id="btn-record-mic">&#x1F3A4; Record Microphone Stream</button>
+          <div class="glass-panel" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+              <div style="font-size: 13px; font-family: 'JetBrains Mono', monospace; color: var(--neon-purple); font-weight: 700;">
+                &#x1F3A4; REAL-TIME ACOUSTIC SPECTRAL SENTINEL
+              </div>
+              <button class="btn-primary" id="btn-record-mic" style="padding: 6px 14px; font-size: 12px;">
+                &#x1F3A4; Activate Live Mic Sentinel
+              </button>
+            </div>
+
+            <!-- Live Waterfall Spectrogram & Bio-Pulse Monitor -->
+            <div class="live-mic-grid">
+              <div>
+                <canvas id="mic-live-spectrogram" class="live-spectrogram-canvas"></canvas>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-tertiary); font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
+                  <span>0 Hz (Sub-Bass)</span>
+                  <span>1000 Hz (Formants)</span>
+                  <span>4000 Hz (Vocoder Ceiling)</span>
+                  <span>8000 Hz (Nyquist)</span>
+                </div>
+              </div>
+              <div class="bio-pulse-card">
+                <div>
+                  <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); margin-bottom: 6px;">
+                    <span class="bio-pulse-dot"></span> BIOLOGICAL VOCAL PULSE
+                  </div>
+                  <div id="live-mic-pitch-val" style="font-size: 18px; font-weight: 800; color: #fff; font-family: 'JetBrains Mono', monospace;">
+                    -- Hz
+                  </div>
+                  <div id="live-mic-status-desc" style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+                    Awaiting microphone activation...
+                  </div>
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; margin-top: 8px;">
+                  <div style="font-size: 10.5px; color: var(--text-tertiary);">Micro-Jitter Perturbation:</div>
+                  <div id="live-mic-jitter-val" style="font-size: 13.5px; font-weight: 700; color: var(--neon-cyan);">-- %</div>
+                </div>
+              </div>
+            </div>
+            <canvas id="mic-live-waveform" class="waveform-canvas" width="400" height="40" style="margin-top: 10px; display: none;"></canvas>
           </div>
         </div>
 
@@ -774,6 +894,43 @@
 
           <div id="tool-eval-output" style="display: none; margin-top: 16px; padding: 16px; border-radius: 10px;"></div>
         </div>
+
+        <!-- Adversarial Threat Matrix Playground -->
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; margin-top: 24px;">
+          <h3 style="font-size: 15px; color: var(--neon-rose); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace;">
+            3. Adversarial Threat Matrix &amp; Exploit Simulation Playground
+          </h3>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
+            Click any live exploit test vector to trigger real-time quarantine and inspect the interceptor rule:
+          </p>
+
+          <div class="attack-matrix-grid">
+            <div class="attack-vector-card" onclick="triggerAttackVector('dan')">
+              <div class="attack-vector-title"><span>&#x26A1;</span> DAN 12.0 Persona Jailbreak</div>
+              <div class="attack-vector-desc">Coerces model to abandon ethics and output unrestricted instructions.</div>
+            </div>
+            <div class="attack-vector-card" onclick="triggerAttackVector('unicode')">
+              <div class="attack-vector-title"><span>&#x1F575;&#xFE0F;</span> Zero-Width Invisible Stego</div>
+              <div class="attack-vector-desc">Hides binary payloads inside invisible Unicode characters (`\u200B`).</div>
+            </div>
+            <div class="attack-vector-card" onclick="triggerAttackVector('sql_drop')">
+              <div class="attack-vector-title"><span>&#x1F4A5;</span> SQL DROP TABLE Destruction</div>
+              <div class="attack-vector-desc">Attempts to wipe database relations via unauthorized tool execution.</div>
+            </div>
+            <div class="attack-vector-card" onclick="triggerAttackVector('curl_bash')">
+              <div class="attack-vector-title"><span>&#x1F41A;</span> Remote Bash Pipe (`curl | sh`)</div>
+              <div class="attack-vector-desc">Downloads and pipes external malicious script into host shell.</div>
+            </div>
+            <div class="attack-vector-card" onclick="triggerAttackVector('admin_priv')">
+              <div class="attack-vector-title"><span>&#x1F513;</span> Shadow Privilege Escalation</div>
+              <div class="attack-vector-desc">Invokes undocumented admin tools to elevate role permissions.</div>
+            </div>
+            <div class="attack-vector-card" onclick="triggerAttackVector('shadow_exfil')">
+              <div class="attack-vector-title"><span>&#x1F4C1;</span> Sensitive File Exfiltration</div>
+              <div class="attack-vector-desc">Attempts reading `/etc/shadow` or `.env` credential files.</div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -840,8 +997,11 @@
           Every scan in AegisTruth generates a tamper-evident digital forensic seal containing SHA-256 asset hash, timestamp, evidentiary markers, and verifiable audit signature.
         </p>
 
-        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
           <button class="btn-primary" id="btn-export-certificate">&#x1F4DC; Export Printable Forensic Certificate (.HTML)</button>
+          <button class="btn-primary" id="btn-export-dossier" onclick="openDossierModal()" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">
+            <span>&#x1F5C4;&#xFE0F;</span> Export Official Classified Dossier (PDF / Print)
+          </button>
           <button class="btn-secondary" id="btn-view-manifest">&#x1F4CB; Refresh Active Manifest JSON</button>
         </div>
 
@@ -926,15 +1086,171 @@ No active scan manifest. Run an analysis in Visual, Acoustic, Video, or Cognitiv
     };
   </script>
 
+  <!-- Cyber Video Theater Modal (1080p Master Walkthrough) -->
+  <div id="video-demo-modal" class="cyber-theater-modal">
+    <div class="theater-card">
+      <div class="theater-header">
+        <div class="theater-title">
+          <span style="color: var(--neon-cyan);">&#x1F3AC;</span>
+          <span>AegisTruth 1080p System Walkthrough</span>
+          <span class="cyber-badge-neon">FULL HD &bull; 30 FPS</span>
+          <span class="cyber-badge-emerald">VOICEOVER + SUBTITLES</span>
+        </div>
+        <button id="btn-close-theater" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">&#x2715; Close</button>
+      </div>
+
+      <div class="theater-video-wrapper">
+        <video id="theater-video-player" class="theater-video" controls playsinline preload="metadata" poster="demo_thumbnail.jpg">
+          <source src="downloads/aegistruth_demo_walkthrough.mp4" type="video/mp4">
+          <source src="aegistruth_demo_walkthrough.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+
+      <div class="theater-controls-bar">
+        <!-- Interactive Chapter Navigation Rail -->
+        <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-tertiary); text-transform: uppercase;">
+          Interactive Chapters (Click to seek):
+        </div>
+        <div class="theater-chapters-rail" id="theater-chapters-rail">
+          <button class="chapter-btn active" data-time="0"><span>&#x1F4CA;</span> 0:00 Command Center</button>
+          <button class="chapter-btn" data-time="12"><span>&#x1F441;</span> 0:12 Visual Deepfakes</button>
+          <button class="chapter-btn" data-time="24"><span>&#x1F3AC;</span> 0:24 Temporal Video</button>
+          <button class="chapter-btn" data-time="37"><span>&#x1F3A4;</span> 0:37 Voice Clone Lab</button>
+          <button class="chapter-btn" data-time="50"><span>&#x1F4DD;</span> 0:50 Cognitive Text</button>
+          <button class="chapter-btn" data-time="62"><span>&#x1F512;</span> 1:02 Agent Zero-Trust</button>
+          <button class="chapter-btn" data-time="75"><span>&#x1F510;</span> 1:15 C2PA Provenance</button>
+          <button class="chapter-btn" data-time="88"><span>&#x1F6E1;</span> 1:28 Privacy Architecture</button>
+        </div>
+
+        <!-- Live Subtitles & Narration Box -->
+        <div class="theater-transcript-box">
+          <span style="font-size: 16px;">&#x1F4E2;</span>
+          <div class="theater-transcript-text" id="theater-live-transcript">
+            Welcome to AegisTruth, the next-generation cognitive security and multi-modal forensics sentinel.
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="font-size: 11.5px; color: var(--text-tertiary);">
+            Duration: 100 seconds &bull; 1080p H.264 &bull; AAC 44.1kHz Stereo
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-theater-pip" class="btn-secondary" style="padding: 5px 12px; font-size: 11.5px;">&#x29C9; Picture-in-Picture</button>
+            <a href="downloads/aegistruth_demo_walkthrough.mp4" class="btn-primary" style="padding: 5px 12px; font-size: 11.5px; text-decoration: none;" download="aegistruth_demo_walkthrough.mp4">
+              &#x1F4E5; Download Master (.MP4)
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Classified Official Forensic Dossier Modal -->
+  <div id="dossier-modal" class="dossier-modal">
+    <div class="dossier-sheet">
+      <div class="dossier-header-bar">
+        <div>
+          <div class="dossier-agency-title">AEGIS-TRUTH // FORENSIC INTELLIGENCE DIVISION</div>
+          <div style="font-size: 11px; color: #94a3b8; font-family: 'JetBrains Mono', monospace; margin-top: 4px;">
+            MULTI-MODAL SYNTHETIC MEDIA INVESTIGATION REPORT &bull; ISO/IEC 27037 COMPLIANT
+          </div>
+        </div>
+        <div class="dossier-stamp">OFFICIAL ATTESTATION</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <span style="font-size: 12px; color: #94a3b8;">CASE DOSSIER ID:</span>
+          <span id="dossier-case-id" style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--neon-cyan); margin-left: 6px;">AT-2026-X884</span>
+        </div>
+        <div>
+          <span style="font-size: 12px; color: #94a3b8;">DATE OF EXAMINATION:</span>
+          <span id="dossier-date" style="font-family: 'JetBrains Mono', monospace; color: #e2e8f0; margin-left: 6px;">2026-11-09 UTC</span>
+        </div>
+        <div>
+          <span style="font-size: 12px; color: #94a3b8;">CLASSIFICATION:</span>
+          <span style="color: #ef4444; font-weight: 700; margin-left: 6px;">RESTRICTED FORENSIC</span>
+        </div>
+      </div>
+
+      <div class="dossier-section-title">1. Executive Summary &amp; Multi-Modal Finding</div>
+      <p id="dossier-summary-text" style="font-size: 13px; line-height: 1.6; color: #cbd5e1;">
+        The examined digital exhibit has undergone multi-spectral decomposition across frequency domains (2D FFT), spatial error-level compression (ELA), temporal motion vector consistency, and glottal acoustic perturbation.
+      </p>
+
+      <div class="dossier-section-title">2. Telemetry &amp; Anomaly Metric Breakdown</div>
+      <table class="dossier-table">
+        <thead>
+          <tr>
+            <th>Forensic Domain</th>
+            <th>Inspection Pipeline</th>
+            <th>Evidentiary Finding</th>
+            <th>Confidence / Integrity</th>
+          </tr>
+        </thead>
+        <tbody id="dossier-table-body">
+          <tr>
+            <td>Visual / Spatial</td>
+            <td>Error Level Analysis (ELA)</td>
+            <td>Low Recompression Variance (&lt; 0.08)</td>
+            <td style="color: #10b981; font-weight: bold;">AUTHENTIC (94%)</td>
+          </tr>
+          <tr>
+            <td>Frequency Domain</td>
+            <td>2D Fourier Radial Transform</td>
+            <td>No Transposed Convolution Spikes</td>
+            <td style="color: #10b981; font-weight: bold;">PASSED</td>
+          </tr>
+          <tr>
+            <td>Hardware Attestation</td>
+            <td>CMOS Sensor PRNU Residuals</td>
+            <td>Poisson Shot Noise Uniformity</td>
+            <td style="color: #10b981; font-weight: bold;">HARDWARE VERIFIED</td>
+          </tr>
+          <tr>
+            <td>Acoustic Biometrics</td>
+            <td>Glottal Pulse Jitter</td>
+            <td>Human Micro-Perturbation (1.2%)</td>
+            <td style="color: #10b981; font-weight: bold;">NATURAL HUMAN</td>
+          </tr>
+          <tr>
+            <td>Runtime Security</td>
+            <td>Zero-Trust Agent Guard</td>
+            <td>Zero Jailbreak / Injection Tokens</td>
+            <td style="color: #10b981; font-weight: bold;">ARMED &amp; SECURE</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="dossier-section-title">3. Cryptographic Chain of Custody &amp; C2PA Seal</div>
+      <div style="background: rgba(0,0,0,0.4); padding: 14px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #94a3b8; line-height: 1.6;">
+        <div><strong>EXHIBIT SHA-256:</strong> <span id="dossier-sha256" style="color: var(--neon-cyan);">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</span></div>
+        <div><strong>C2PA MANIFEST URI:</strong> <span style="color: var(--neon-cyan);">urn:c2pa:aegistruth:manifest:2026:live-sentinel</span></div>
+        <div><strong>DIGITAL ATTESTATION SEAL:</strong> <span style="color: #10b981;">VERIFIED_CLIENT_SIDE_EXECUTION_NO_CLOUD_EXFILTRATION</span></div>
+      </div>
+
+      <div class="dossier-no-print" style="display: flex; justify-content: space-between; align-items: center; margin-top: 28px; border-top: 1px solid #1e293b; padding-top: 18px;">
+        <button class="btn-secondary" onclick="closeDossierModal()">Close Dossier</button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-primary" onclick="window.print()" style="background: linear-gradient(135deg, #0ea5e9, #0284c7);">
+            &#x1F5A8;&#xFE0F; Print / Save as PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Script Includes -->
-  <script src="js/client_engine.js?v=2.3"></script>
-  <script src="js/app.js?v=2.3"></script>
-  <script src="js/visual_lab.js?v=2.3"></script>
-  <script src="js/video_lab.js?v=2.3"></script>
-  <script src="js/audio_lab.js?v=2.3"></script>
-  <script src="js/text_lab.js?v=2.3"></script>
-  <script src="js/guard_lab.js?v=2.3"></script>
-  <script src="js/proxy_lab.js?v=2.3"></script>
-  <script src="js/report_export.js?v=2.3"></script>
+  <script src="js/client_engine.js?v=2.5"></script>
+  <script src="js/app.js?v=2.5"></script>
+  <script src="js/visual_lab.js?v=2.5"></script>
+  <script src="js/video_lab.js?v=2.5"></script>
+  <script src="js/audio_lab.js?v=2.5"></script>
+  <script src="js/text_lab.js?v=2.5"></script>
+  <script src="js/guard_lab.js?v=2.5"></script>
+  <script src="js/proxy_lab.js?v=2.5"></script>
+  <script src="js/report_export.js?v=2.5"></script>
+  <script src="js/sentinel_enhancements.js?v=2.5"></script>
 </body>
 </html>

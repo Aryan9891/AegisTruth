@@ -65,6 +65,22 @@ def create_app() -> FastAPI:
                 return FileResponse(index_path)
             return {"message": "AegisTruth Sentinel API is running. Visit /docs for API documentation."}
 
+        for filename in [
+            "manifest.json",
+            "sw.js",
+            "favicon.svg",
+            "demo_thumbnail.jpg",
+            "demo_preview.gif",
+            "aegistruth_demo_walkthrough.mp4",
+        ]:
+            file_path = STATIC_DIR / filename
+            if file_path.exists():
+                def _make_handler(p):
+                    async def _handler():
+                        return FileResponse(p)
+                    return _handler
+                app.add_api_route(f"/{filename}", _make_handler(file_path), methods=["GET"], include_in_schema=False)
+
     return app
 
 app = create_app()

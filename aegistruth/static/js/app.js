@@ -569,7 +569,7 @@ function initHolographicCards() {
   });
 }
 
-// 7. Background Animated Neural Matrix Canvas
+// 7. Background Animated Neural Matrix Canvas (Multi-Mode: Synapse, Rain, Sonar)
 function initNeuralCanvas() {
   const canvas = document.getElementById("bg-neural-canvas");
   if (!canvas) return;
@@ -597,39 +597,92 @@ function initNeuralCanvas() {
     });
   }
 
+  // Matrix rain state
+  const fontSize = 14;
+  const columns = Math.floor(w / fontSize);
+  const rainDrops = Array.from({ length: columns }, () => Math.floor(Math.random() * -50));
+  const rainChars = "0101010101AEGISFORENSICX8847Z19".split("");
+
+  let sonarRadius = 0;
+
   function draw() {
-    ctx.clearRect(0, 0, w, h);
+    const mode = typeof window.getBackgroundMatrixMode === "function" ? window.getBackgroundMatrixMode() : 0;
 
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const dx = nodes[i].x - nodes[j].x;
-        const dy = nodes[i].y - nodes[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+    if (mode === 1) {
+      // Mode 1: Cyber Matrix Rain
+      ctx.fillStyle = "rgba(3, 7, 18, 0.12)";
+      ctx.fillRect(0, 0, w, h);
+      ctx.font = `${fontSize}px 'JetBrains Mono', monospace`;
 
-        if (dist < 130) {
-          const alpha = (1 - dist / 130) * 0.22;
-          ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.moveTo(nodes[i].x, nodes[i].y);
-          ctx.lineTo(nodes[j].x, nodes[j].y);
-          ctx.stroke();
+      for (let i = 0; i < rainDrops.length; i++) {
+        const char = rainChars[Math.floor(Math.random() * rainChars.length)];
+        const x = i * fontSize;
+        const y = rainDrops[i] * fontSize;
+
+        ctx.fillStyle = Math.random() > 0.85 ? "#38bdf8" : "#059669";
+        ctx.fillText(char, x, y);
+
+        if (y > h && Math.random() > 0.975) {
+          rainDrops[i] = 0;
+        }
+        rainDrops[i]++;
+      }
+    } else if (mode === 2) {
+      // Mode 2: Tactical Sonar Radar Scan
+      ctx.clearRect(0, 0, w, h);
+      sonarRadius = (sonarRadius + 1.2) % Math.max(w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+
+      ctx.strokeStyle = "rgba(6, 182, 212, 0.18)";
+      ctx.lineWidth = 1;
+      for (let r = 80; r < Math.max(w, h); r += 140) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "rgba(6, 182, 212, 0.45)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, sonarRadius, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      // Mode 0: Synapse Particle Constellation (Default)
+      ctx.clearRect(0, 0, w, h);
+
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dy = nodes[i].y - nodes[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 130) {
+            const alpha = (1 - dist / 130) * 0.22;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(nodes[i].x, nodes[i].y);
+            ctx.lineTo(nodes[j].x, nodes[j].y);
+            ctx.stroke();
+          }
         }
       }
+
+      nodes.forEach(node => {
+        node.x += node.vx;
+        node.y += node.vy;
+
+        if (node.x < 0 || node.x > w) node.vx *= -1;
+        if (node.y < 0 || node.y > h) node.vy *= -1;
+
+        ctx.fillStyle = node.color + "0.6)";
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
     }
-
-    nodes.forEach(node => {
-      node.x += node.vx;
-      node.y += node.vy;
-
-      if (node.x < 0 || node.x > w) node.vx *= -1;
-      if (node.y < 0 || node.y > h) node.vy *= -1;
-
-      ctx.fillStyle = node.color + "0.6)";
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-      ctx.fill();
-    });
 
     requestAnimationFrame(draw);
   }

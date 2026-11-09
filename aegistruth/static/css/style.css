@@ -1729,3 +1729,658 @@ canvas.waveform-canvas {
   font-family: 'JetBrains Mono', monospace;
   text-transform: uppercase;
 }
+
+
+/* ==========================================================================
+   AEGIS-TRUTH NEXT-GEN ULTRA ADVANCED SUITE ENHANCEMENTS
+   Hero Banner, Cyber Cinema, Live Webcam Sentinel, Real-Time Audio Spectrogram,
+   Adversarial Threat Playground, and Classified Forensic Intelligence Dossier
+   ========================================================================== */
+
+/* 1. Hero Walkthrough Showcase Banner */
+.hero-walkthrough-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 28px;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, rgba(8, 14, 28, 0.85) 0%, rgba(14, 25, 48, 0.7) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(6, 182, 212, 0.05);
+}
+
+.hero-walkthrough-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-purple), transparent);
+  animation: heroBorderGlow 4s infinite linear;
+}
+
+@keyframes heroBorderGlow {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.hero-banner-content {
+  flex: 1;
+  min-width: 280px;
+}
+
+.hero-badge-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.cyber-badge-neon {
+  background: rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  color: var(--neon-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+.cyber-badge-amber {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: var(--neon-amber);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.cyber-badge-emerald {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: var(--neon-emerald);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.hero-banner-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+
+.hero-banner-desc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin-bottom: 18px;
+  max-width: 680px;
+}
+
+.hero-banner-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-glow-cyan {
+  background: linear-gradient(135deg, #06b6d4, #0284c7);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+  border: none;
+  font-weight: 700;
+  transition: all 0.25s ease;
+}
+
+.btn-glow-cyan:hover {
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.7);
+  transform: translateY(-2px);
+}
+
+.hero-banner-preview {
+  position: relative;
+  width: 240px;
+  height: 135px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hero-banner-preview:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 32px rgba(6, 182, 212, 0.35);
+}
+
+.hero-preview-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-play-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.2s ease;
+}
+
+.hero-banner-preview:hover .hero-play-overlay {
+  background: rgba(3, 7, 18, 0.25);
+}
+
+.hero-play-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(6, 182, 212, 0.9);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.6);
+  padding-left: 3px;
+  animation: playPulse 2s infinite ease-in-out;
+}
+
+@keyframes playPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 16px rgba(6, 182, 212, 0.6); }
+  50% { transform: scale(1.08); box-shadow: 0 0 26px rgba(6, 182, 212, 0.9); }
+}
+
+.hero-play-time {
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #e2e8f0;
+  background: rgba(0, 0, 0, 0.65);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+/* 2. Cyber Video Theater Modal */
+.cyber-theater-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.92);
+  backdrop-filter: blur(12px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.cyber-theater-modal.active {
+  display: flex;
+  opacity: 1;
+}
+
+.theater-card {
+  background: #090e1a;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(6, 182, 212, 0.15);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 1040px;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.theater-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: rgba(14, 23, 42, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.theater-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theater-video-wrapper {
+  position: relative;
+  background: #000;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 52vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theater-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.theater-controls-bar {
+  padding: 14px 20px;
+  background: rgba(10, 16, 30, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.theater-chapters-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.chapter-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chapter-btn:hover {
+  background: rgba(6, 182, 212, 0.15);
+  border-color: var(--neon-cyan);
+  color: #fff;
+}
+
+.chapter-btn.active {
+  background: rgba(6, 182, 212, 0.25);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+}
+
+.theater-transcript-box {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-left: 3px solid var(--neon-cyan);
+}
+
+.theater-transcript-text {
+  color: #f1f5f9;
+  font-weight: 500;
+}
+
+/* 3. Live Webcam Sentinel HUD */
+.webcam-sentinel-panel {
+  background: #060b16;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 20px;
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.webcam-sentinel-panel.active {
+  display: block;
+}
+
+.webcam-view-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 4 / 3;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.15);
+}
+
+.webcam-video-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.webcam-canvas-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.webcam-hud-header {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
+  pointer-events: none;
+}
+
+.webcam-hud-footer {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #10b981;
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+  pointer-events: none;
+}
+
+.webcam-reticle-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px;
+  height: 220px;
+  border: 1px dashed rgba(6, 182, 212, 0.6);
+  border-radius: 12px;
+  pointer-events: none;
+  animation: reticlePulse 3s infinite ease-in-out;
+}
+
+@keyframes reticlePulse {
+  0%, 100% { border-color: rgba(6, 182, 212, 0.6); box-shadow: 0 0 10px rgba(6, 182, 212, 0.2); }
+  50% { border-color: rgba(6, 182, 212, 0.9); box-shadow: 0 0 20px rgba(6, 182, 212, 0.5); }
+}
+
+.webcam-actions-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+/* 4. Live Microphone Real-Time Acoustic Spectrogram */
+.live-mic-sentinel-wrapper {
+  background: #060b16;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 18px;
+  display: none;
+}
+
+.live-mic-sentinel-wrapper.active {
+  display: block;
+}
+
+.live-mic-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+@media (max-width: 768px) {
+  .live-mic-grid { grid-template-columns: 1fr; }
+  .hero-walkthrough-banner { flex-direction: column; text-align: center; }
+  .hero-banner-preview { width: 100%; height: 180px; }
+  .hero-badge-row, .hero-banner-actions { justify-content: center; }
+}
+
+.live-spectrogram-canvas {
+  width: 100%;
+  height: 180px;
+  background: #02050b;
+  border-radius: 10px;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  display: block;
+}
+
+.bio-pulse-card {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bio-pulse-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--neon-purple);
+  box-shadow: 0 0 12px var(--neon-purple);
+  display: inline-block;
+  margin-right: 8px;
+  animation: heartPulse 1.2s infinite ease-in-out;
+}
+
+@keyframes heartPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
+
+/* 5. Adversarial AI Attack Matrix & Payload Playground */
+.attack-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.attack-vector-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.attack-vector-card:hover {
+  background: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.4);
+  transform: translateY(-2px);
+}
+
+.attack-vector-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.attack-vector-desc {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* 6. Classified Official Forensic Intelligence Dossier Modal */
+.dossier-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.94);
+  backdrop-filter: blur(14px);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.dossier-modal.active {
+  display: flex;
+}
+
+.dossier-sheet {
+  background: #0c1220;
+  border: 2px solid #1e293b;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 50px rgba(56, 189, 248, 0.1);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 860px;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 36px 40px;
+  color: #e2e8f0;
+  position: relative;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.dossier-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid #334155;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+}
+
+.dossier-agency-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #f8fafc;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.dossier-stamp {
+  border: 2px solid #ef4444;
+  color: #ef4444;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 14px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-radius: 4px;
+  transform: rotate(-3deg);
+}
+
+.dossier-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.5px;
+  margin: 20px 0 10px 0;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  padding-bottom: 4px;
+}
+
+.dossier-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin: 12px 0;
+}
+
+.dossier-table th, .dossier-table td {
+  padding: 8px 12px;
+  border: 1px solid #1e293b;
+  text-align: left;
+}
+
+.dossier-table th {
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+/* Print Rules for Dossier Export */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .dossier-sheet, .dossier-sheet * {
+    visibility: visible;
+  }
+  .dossier-modal {
+    position: absolute;
+    inset: 0;
+    background: #fff !important;
+    display: block !important;
+    padding: 0;
+  }
+  .dossier-sheet {
+    max-width: 100% !important;
+    max-height: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    color: #000 !important;
+    padding: 20px !important;
+  }
+  .dossier-header-bar, .dossier-section-title, .dossier-table td, .dossier-table th {
+    border-color: #000 !important;
+    color: #000 !important;
+  }
+  .dossier-no-print {
+    display: none !important;
+  }
+}
