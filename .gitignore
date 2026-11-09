@@ -39,6 +39,7 @@ htmlcov/
 .env
 *.env
 .env.local
+outreach_campaign_log.json
 
 # Editor / OS
 .vscode/
