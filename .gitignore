@@ -40,6 +40,11 @@ htmlcov/
 *.env
 .env.local
 outreach_campaign_log.json
+outreach_india_campaign_log.json
+/aegistruth_demo_walkthrough.mp4
+scripts/frames/
+scripts/audio/
+scripts/video_output/
 
 # Editor / OS
 .vscode/
