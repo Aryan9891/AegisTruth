@@ -52,4 +52,5 @@ scripts/video_output/
 *.swp
 .DS_Store
 Thumbs.db
+node_modules/
 

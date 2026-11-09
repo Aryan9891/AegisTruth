@@ -79,13 +79,6 @@ async function loadSampleVideo(filename) {
   }
 }
 
-function createDummyVideoBlob(frames) {
-  const fData = new FormData();
-  const blob = new Blob(["GIF89a..."], { type: "image/gif" });
-  fData.append("file", blob, "sample.gif");
-  return fData;
-}
-
 async function processVideoFile(file) {
   setLoadingState("video-loading", true);
   if (typeof playCyberSound === "function") playCyberSound("scan");
