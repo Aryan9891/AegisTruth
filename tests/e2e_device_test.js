@@ -129,6 +129,28 @@ async function runDeviceTest(browser, device) {
     }
   }
 
+  // 3B. Multi-Modal Diagnostic Benchmark Suite Modal Test
+  const benchBtn = await page.$("#btn-run-full-benchmark");
+  if (benchBtn) {
+    await benchBtn.click();
+    await page.waitForFunction(() => {
+      const log = document.getElementById("benchmark-log");
+      if (!log) return false;
+      const text = log.innerText;
+      return text.includes("DIAGNOSTIC SUITE COMPLETE") || text.includes("Diagnostic Error");
+    }, { timeout: 15000 });
+
+    const logText = await page.$eval("#benchmark-log", (el) => el.innerText);
+    if (logText.includes("Diagnostic Error")) {
+      throw new Error("Multi-Modal Diagnostic Suite failed with error:\n" + logText);
+    }
+    console.log(`  ✓ Multi-Modal Diagnostic Suite completed all 6 pipelines successfully`);
+
+    // Close modal
+    await page.$eval("#btn-close-benchmark", (b) => b.click());
+    await new Promise((r) => setTimeout(r, 150));
+  }
+
   // 4. Biometric Live Webcam Sentinel Modal Test
   const webcamBtn = await page.$("#btn-hero-webcam-sentinel");
   if (webcamBtn) {
@@ -159,17 +181,17 @@ async function runDeviceTest(browser, device) {
   await goToTab("tab-visual");
   await new Promise((r) => setTimeout(r, 200));
 
-  const sampleImgReal = await page.$("#btn-sample-image-real");
-  if (sampleImgReal) {
-    await sampleImgReal.click();
-    await page.waitForFunction(() => {
-      const panel = document.getElementById("image-results-panel");
-      return panel && panel.style.display === "block";
-    }, { timeout: 10000 });
-    const verdict = await page.$eval("#image-verdict-badge", (el) => el.innerText);
-    const elaVar = await page.$eval("#metric-ela-var", (el) => el.innerText);
-    console.log(`  ✓ Visual Lab real sample tested -> Verdict: ${verdict}, ELA Variance: ${elaVar}`);
-  }
+  await page.$eval("#btn-sample-image-real", (b) => {
+    b.scrollIntoView({ block: "center" });
+    b.click();
+  });
+  await page.waitForFunction(() => {
+    const panel = document.getElementById("image-results-panel");
+    return panel && panel.style.display === "block";
+  }, { timeout: 12000 });
+  const verdict = await page.$eval("#image-verdict-badge", (el) => el.innerText);
+  const elaVar = await page.$eval("#metric-ela-var", (el) => el.innerText);
+  console.log(`  ✓ Visual Lab real sample tested -> Verdict: ${verdict}, ELA Variance: ${elaVar}`);
 
   // Lens Switcher test
   const lensFft = await page.$("#btn-lens-fft");
@@ -186,33 +208,33 @@ async function runDeviceTest(browser, device) {
   await goToTab("tab-video");
   await new Promise((r) => setTimeout(r, 200));
 
-  const sampleVidReal = await page.$("#btn-sample-video-real");
-  if (sampleVidReal) {
-    await sampleVidReal.click();
-    await page.waitForFunction(() => {
-      const panel = document.getElementById("video-results-panel");
-      return panel && panel.style.display === "block";
-    }, { timeout: 10000 });
-    const verdict = await page.$eval("#video-verdict-badge", (el) => el.innerText);
-    const flicker = await page.$eval("#metric-video-flicker", (el) => el.innerText);
-    console.log(`  ✓ Video Lab real sample tested -> Verdict: ${verdict}, Flicker Score: ${flicker}`);
-  }
+  await page.$eval("#btn-sample-video-real", (b) => {
+    b.scrollIntoView({ block: "center" });
+    b.click();
+  });
+  await page.waitForFunction(() => {
+    const panel = document.getElementById("video-results-panel");
+    return panel && panel.style.display === "block";
+  }, { timeout: 12000 });
+  const vidVerdict = await page.$eval("#video-verdict-badge", (el) => el.innerText);
+  const flicker = await page.$eval("#metric-video-flicker", (el) => el.innerText);
+  console.log(`  ✓ Video Lab real sample tested -> Verdict: ${vidVerdict}, Flicker Score: ${flicker}`);
 
   // 7. Voice Clone Lab (Tab Audio)
   await goToTab("tab-audio");
   await new Promise((r) => setTimeout(r, 200));
 
-  const sampleAudHuman = await page.$("#btn-sample-audio-human");
-  if (sampleAudHuman) {
-    await sampleAudHuman.click();
-    await page.waitForFunction(() => {
-      const panel = document.getElementById("audio-results-panel");
-      return panel && panel.style.display === "block";
-    }, { timeout: 10000 });
-    const verdict = await page.$eval("#audio-verdict-badge", (el) => el.innerText);
-    const jitter = await page.$eval("#metric-audio-jitter", (el) => el.innerText);
-    console.log(`  ✓ Audio Lab human sample tested -> Verdict: ${verdict}, Pitch Jitter: ${jitter}`);
-  }
+  await page.$eval("#btn-sample-audio-human", (b) => {
+    b.scrollIntoView({ block: "center" });
+    b.click();
+  });
+  await page.waitForFunction(() => {
+    const panel = document.getElementById("audio-results-panel");
+    return panel && panel.style.display === "block";
+  }, { timeout: 12000 });
+  const audVerdict = await page.$eval("#audio-verdict-badge", (el) => el.innerText);
+  const jitter = await page.$eval("#metric-audio-jitter", (el) => el.innerText);
+  console.log(`  ✓ Audio Lab human sample tested -> Verdict: ${audVerdict}, Pitch Jitter: ${jitter}`);
 
   // 8. Cognitive & Facts Lab (Tab Text) - Real Dynamic Extraction, No Hardcoded Claims
   await goToTab("tab-text");
@@ -227,40 +249,39 @@ async function runDeviceTest(browser, device) {
   }, customContradictionText);
 
   // Click Analyze Text
-  const analyzeTextBtn = await page.$("#btn-analyze-text");
-  if (analyzeTextBtn) {
-    await analyzeTextBtn.click();
-    await page.waitForFunction(() => {
-      const panel = document.getElementById("text-results-panel");
-      return panel && panel.style.display === "block";
-    }, { timeout: 8000 });
+  await page.$eval("#btn-analyze-text", (b) => {
+    b.scrollIntoView({ block: "center" });
+    b.click();
+  });
+  await page.waitForFunction(() => {
+    const panel = document.getElementById("text-results-panel");
+    return panel && panel.style.display === "block";
+  }, { timeout: 10000 });
 
-    const entropy = await page.$eval("#metric-text-entropy", (el) => el.innerText);
-    const burstiness = await page.$eval("#metric-text-burstiness", (el) => el.innerText);
-    console.log(`  ✓ Text Shannon Entropy: ${entropy}, Burstiness: ${burstiness}`);
-  }
+  const entropy = await page.$eval("#metric-text-entropy", (el) => el.innerText);
+  const burstiness = await page.$eval("#metric-text-burstiness", (el) => el.innerText);
+  console.log(`  ✓ Text Shannon Entropy: ${entropy}, Burstiness: ${burstiness}`);
 
   // Click Verify Facts
-  const verifyFactsBtn = await page.$("#btn-verify-facts");
-  if (verifyFactsBtn) {
-    await verifyFactsBtn.click();
-    await page.waitForFunction(() => {
-      const panel = document.getElementById("fact-results-panel");
-      return panel && panel.style.display === "block";
-    }, { timeout: 8000 });
+  await page.$eval("#btn-fact-check", (b) => {
+    b.scrollIntoView({ block: "center" });
+    b.click();
+  });
+  await page.waitForFunction(() => {
+    const panel = document.getElementById("fact-results-panel");
+    return panel && panel.style.display === "block";
+  }, { timeout: 10000 });
 
-    const factVerdict = await page.$eval("#fact-verdict-badge", (el) => el.innerText);
-    const contradictionCount = await page.$eval("#metric-contradiction-count", (el) => el.innerText);
-    const matrixText = await page.$eval("#claims-matrix-body", (el) => el.innerText);
+  const factScore = await page.$eval("#fact-score-val", (el) => el.innerText);
+  const matrixText = await page.$eval("#fact-claims-table-body", (el) => el.innerText);
 
-    console.log(`  ✓ Fact-checking dynamic result -> Verdict: ${factVerdict}, Contradictions: ${contradictionCount}`);
-    
-    // STRICT VERIFICATION: Verify that NO hardcoded "renewable energy" string is present!
-    if (matrixText.toLowerCase().includes("renewable energy")) {
-      throw new Error("FLAW DETECTED: Hardcoded 'renewable energy' claim found in dynamic fact verification results!");
-    }
-    console.log(`  ✓ VERIFIED ZERO HARDCODING: Dynamic matrix processed custom SpaceX / Lincoln claims!`);
+  console.log(`  ✓ Fact-checking dynamic result -> Factuality Index: ${factScore}`);
+  
+  // STRICT VERIFICATION: Verify that NO hardcoded "renewable energy" string is present!
+  if (matrixText.toLowerCase().includes("renewable energy")) {
+    throw new Error("FLAW DETECTED: Hardcoded 'renewable energy' claim found in dynamic fact verification results!");
   }
+  console.log(`  ✓ VERIFIED ZERO HARDCODING: Dynamic matrix processed custom SpaceX / Lincoln claims!`);
 
   // 9. Agent Zero-Trust Lab (Tab Guard) & Adversarial Threat Matrix
   await goToTab("tab-guard");
