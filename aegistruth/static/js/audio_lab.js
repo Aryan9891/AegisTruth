@@ -277,6 +277,20 @@ function drawStaticWaveform(wavePoints) {
   const canvas = document.getElementById("audio-static-waveform");
   if (!canvas || !wavePoints) return;
   const ctx = canvas.getContext("2d");
+
+  // Handle data URL image or array of floats
+  if (typeof wavePoints === "string" && wavePoints.startsWith("data:")) {
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    };
+    img.src = wavePoints;
+    return;
+  }
+
+  if (!Array.isArray(wavePoints)) return;
+
   ctx.fillStyle = "#090d16";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.strokeStyle = "#38bdf8";
