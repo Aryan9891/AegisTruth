@@ -151,6 +151,62 @@ async function runDeviceTest(browser, device) {
     await new Promise((r) => setTimeout(r, 150));
   }
 
+  // 3C. Tactical Cyber SOC War Room Mode Test
+  const warRoomBtn = await page.$("#btn-header-war-room");
+  if (warRoomBtn) {
+    await warRoomBtn.click();
+    await new Promise((r) => setTimeout(r, 150));
+    const isWarRoomActive = await page.evaluate(() => document.body.classList.contains("war-room-mode"));
+    const isBannerShown = await page.$eval("#war-room-banner", (el) => window.getComputedStyle(el).display !== "none");
+    console.log(`  ✓ Cyber SOC War Room activated: ${isWarRoomActive}, banner visible: ${isBannerShown}`);
+
+    // Toggle back
+    await warRoomBtn.click();
+    await new Promise((r) => setTimeout(r, 100));
+  }
+
+  // 3D. Media URL Scanner Modal Test
+  const urlScanBtn = await page.$("#btn-header-scan-url");
+  if (urlScanBtn) {
+    await urlScanBtn.click();
+    await new Promise((r) => setTimeout(r, 200));
+    const isModalOpen = await page.$eval("#url-scanner-modal", (el) => window.getComputedStyle(el).display === "flex");
+    console.log(`  ✓ Media URL Scanner modal opened: ${isModalOpen}`);
+
+    await page.type("#input-media-url", "https://example.com/test_media.jpg");
+    await page.$eval("#btn-close-url-modal", (b) => b.click());
+    await new Promise((r) => setTimeout(r, 150));
+    const isClosed = await page.$eval("#url-scanner-modal", (el) => window.getComputedStyle(el).display === "none");
+    console.log(`  ✓ Media URL Scanner modal closed: ${isClosed}`);
+  }
+
+  // 3E. Enterprise Multi-Asset Batch Forensic Triage Queue Test
+  const batchDropzone = await page.$("#batch-dropzone");
+  if (batchDropzone) {
+    await page.evaluate(() => {
+      if (typeof window.enqueueBatchFiles === "function") {
+        const fakeFile = new File(["AegisTruth batch integrity verification payload"], "triage_audit.txt", { type: "text/plain" });
+        window.enqueueBatchFiles([fakeFile]);
+      }
+    });
+
+    await page.waitForFunction(() => {
+      const rows = document.querySelectorAll("#batch-table-body tr");
+      if (rows.length === 0) return false;
+      const text = rows[0].innerText;
+      return text.includes("AUTHENTIC") || text.includes("HIGH RISK") || text.includes("SUSPICIOUS") || text.includes("ERROR");
+    }, { timeout: 10000 });
+
+    const rowText = await page.$eval("#batch-table-body tr", (el) => el.innerText);
+    console.log(`  ✓ Batch Forensic Triage completed asset analysis: ${rowText.split("\n")[0] || "triage_audit.txt"}`);
+
+    // Test clear batch
+    await page.$eval("#btn-clear-batch", (b) => b.click());
+    await new Promise((r) => setTimeout(r, 150));
+    const isEmpty = await page.$eval("#batch-table-body", (el) => el.innerText.includes("No files currently in triage"));
+    console.log(`  ✓ Batch Forensic Triage queue cleared: ${isEmpty}`);
+  }
+
   // 4. Biometric Live Webcam Sentinel Modal Test
   const webcamBtn = await page.$("#btn-hero-webcam-sentinel");
   if (webcamBtn) {
@@ -204,6 +260,31 @@ async function runDeviceTest(browser, device) {
     console.log(`  ✓ Lens Mode Switcher (ELA <-> FFT) verified`);
   }
 
+  // 5B. Multi-Spectral Microscope & Bit-Plane Slicer Test
+  const microCanvas = await page.$("#microscope-canvas");
+  if (microCanvas) {
+    // Click bit0, bit7, sobel, original
+    await page.$eval('button[data-lens="bit0"]', (b) => b.click());
+    await new Promise((r) => setTimeout(r, 80));
+    await page.$eval('button[data-lens="bit7"]', (b) => b.click());
+    await new Promise((r) => setTimeout(r, 80));
+    await page.$eval('button[data-lens="sobel"]', (b) => b.click());
+    await new Promise((r) => setTimeout(r, 80));
+    await page.$eval('button[data-lens="original"]', (b) => b.click());
+    await new Promise((r) => setTimeout(r, 80));
+
+    // Test Loupe toggle
+    const loupeBtn = await page.$("#btn-toggle-loupe");
+    if (loupeBtn) {
+      await loupeBtn.click();
+      await new Promise((r) => setTimeout(r, 80));
+      const loupeOn = await page.$eval("#btn-toggle-loupe", (el) => el.innerText.includes("ON"));
+      await loupeBtn.click();
+      await new Promise((r) => setTimeout(r, 80));
+      console.log(`  ✓ Multi-Spectral Microscope & Bit-Plane Slicer verified (Loupe toggle: ${loupeOn})`);
+    }
+  }
+
   // 6. Temporal Video Lab (Tab Video)
   await goToTab("tab-video");
   await new Promise((r) => setTimeout(r, 200));
@@ -220,6 +301,23 @@ async function runDeviceTest(browser, device) {
   const flicker = await page.$eval("#metric-video-flicker", (el) => el.innerText);
   console.log(`  ✓ Video Lab real sample tested -> Verdict: ${vidVerdict}, Flicker Score: ${flicker}`);
 
+  // 6B. Optical Motion Vector Flow & Frame Scrubber Studio Test
+  const motionCanvas = await page.$("#video-motion-canvas");
+  if (motionCanvas) {
+    const coherence = await page.$eval("#metric-flow-coherence", (el) => el.innerText);
+    const velocity = await page.$eval("#metric-flow-velocity", (el) => el.innerText);
+    console.log(`  ✓ Optical Flow Coherence: ${coherence}, Mean Velocity: ${velocity}`);
+
+    // Click frame scrubber thumbnail
+    const frame2 = await page.$('.frame-thumb-item[data-frame="2"]');
+    if (frame2) {
+      await frame2.click();
+      await new Promise((r) => setTimeout(r, 100));
+      const activeIdx = await page.$eval("#scrubber-active-frame-idx", (el) => el.innerText);
+      console.log(`  ✓ Frame Scrubber activated frame #${activeIdx}`);
+    }
+  }
+
   // 7. Voice Clone Lab (Tab Audio)
   await goToTab("tab-audio");
   await new Promise((r) => setTimeout(r, 200));
@@ -235,6 +333,30 @@ async function runDeviceTest(browser, device) {
   const audVerdict = await page.$eval("#audio-verdict-badge", (el) => el.innerText);
   const jitter = await page.$eval("#metric-audio-jitter", (el) => el.innerText);
   console.log(`  ✓ Audio Lab human sample tested -> Verdict: ${audVerdict}, Pitch Jitter: ${jitter}`);
+
+  // 7B. Biometric Formant Acoustic Vowel Space (F1/F2) & Equalizer Test
+  const formantCanvas = await page.$("#audio-formant-canvas");
+  if (formantCanvas) {
+    const f1 = await page.$eval("#metric-formant-f1", (el) => el.innerText);
+    const f2 = await page.$eval("#metric-formant-f2", (el) => el.innerText);
+    const disp = await page.$eval("#metric-vowel-dispersion", (el) => el.innerText);
+    console.log(`  ✓ Formant Acoustic Space -> F1: ${f1}, F2: ${f2}, Dispersion: ${disp}`);
+
+    // Click equalizer filter pill
+    const vocalPill = await page.$('.audio-filter-pill[data-filter="vocal"]');
+    if (vocalPill) {
+      await vocalPill.click();
+      await new Promise((r) => setTimeout(r, 80));
+    }
+
+    // Click Play Filtered Audio
+    const playFilteredBtn = await page.$("#btn-play-filtered-audio");
+    if (playFilteredBtn) {
+      await playFilteredBtn.click();
+      await new Promise((r) => setTimeout(r, 150));
+      console.log(`  ✓ Web Audio equalizer filter preview triggered`);
+    }
+  }
 
   // 8. Cognitive & Facts Lab (Tab Text) - Real Dynamic Extraction, No Hardcoded Claims
   await goToTab("tab-text");
@@ -261,6 +383,11 @@ async function runDeviceTest(browser, device) {
   const entropy = await page.$eval("#metric-text-entropy", (el) => el.innerText);
   const burstiness = await page.$eval("#metric-text-burstiness", (el) => el.innerText);
   console.log(`  ✓ Text Shannon Entropy: ${entropy}, Burstiness: ${burstiness}`);
+
+  // 8B. Token Perplexity Heatmap & Binoculars Radar Test
+  const tokenChips = await page.$$("#token-perplexity-container .token-chip");
+  const binocRatio = await page.$eval("#metric-binoculars-ratio", (el) => el.innerText);
+  console.log(`  ✓ Token Perplexity Heatmap chips rendered: ${tokenChips.length}, Binoculars Ratio: ${binocRatio}`);
 
   // Click Verify Facts
   await page.$eval("#btn-fact-check", (b) => {

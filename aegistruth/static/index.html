@@ -165,6 +165,12 @@
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--neon-cyan);margin-right:6px;box-shadow:0 0 8px var(--neon-cyan);"></span>
             Web Sentinel Mode
           </div>
+          <button id="btn-header-scan-url" class="shortcut-pill" title="Analyze remote media by URL">
+            &#x1F517; Scan URL
+          </button>
+          <button id="btn-header-war-room" class="shortcut-pill" title="Toggle Cyber SOC Threat War Room Mode">
+            &#x1F6A8; SOC Mode
+          </button>
           <button id="shortcut-cmd-k" class="shortcut-pill" title="Press Ctrl+K to search">
             &#x2318;K Search Tools
           </button>
@@ -173,6 +179,11 @@
           </button>
         </div>
       </header>
+
+      <!-- Cyber Defense SOC Alert Banner (Activated in War Room Mode) -->
+      <div id="war-room-banner" class="war-room-alert-banner">
+        &#x26A0;&#xFE0F; CYBER DEFENSE SOC DEFCON-1 ACTIVE &bull; THREAT TELEMETRY ARMED &bull; REAL-TIME HEURISTICS ENGAGED
+      </div>
 
       <!-- Main Content Area -->
       <main class="workspace-main">
@@ -300,6 +311,51 @@
             <button class="btn-secondary" onclick="switchTab('tab-guard')">&#x1F512; Inspect Agent Firewall</button>
             <button class="btn-secondary" onclick="switchTab('tab-proxy')">&#x1F310; View Intercepted Logs</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Enterprise Multi-Asset Batch Forensic Triage Queue -->
+      <div class="batch-triage-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--neon-cyan); margin-bottom: 4px;">
+              &#x1F5C3;&#xFE0F; Enterprise Multi-Asset Forensic Triage Queue
+            </h3>
+            <p style="font-size: 12.5px; color: var(--text-secondary);">
+              Ingest batches of mixed images, audio, video, or documents simultaneously. Automated concurrent mathematical triage and threat scoring.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button id="btn-clear-batch" class="btn-secondary" style="padding: 6px 14px; font-size: 12px;">Clear Queue</button>
+            <button id="btn-export-batch-csv" class="btn-secondary" style="padding: 6px 14px; font-size: 12px;">Export CSV</button>
+            <button id="btn-export-batch-json" class="btn-primary" style="padding: 6px 14px; font-size: 12px;">Export JSON</button>
+          </div>
+        </div>
+        <div class="batch-dropzone" id="batch-dropzone">
+          <div style="font-size: 28px; margin-bottom: 8px;">&#x1F4E6;</div>
+          <div style="font-weight: 700; font-size: 14px; margin-bottom: 4px;">Drag &amp; Drop Multiple Forensic Assets Here</div>
+          <div style="font-size: 11.5px; color: var(--text-tertiary);">Or click to select files (Images, Audio, Video, Text Documents)</div>
+          <input type="file" id="batch-file-input" multiple style="display: none;">
+        </div>
+        <div class="table-responsive-wrapper" style="margin-top: 14px; max-height: 320px; overflow-y: auto;">
+          <table class="batch-table">
+            <thead>
+              <tr>
+                <th>Asset Name</th>
+                <th>Domain</th>
+                <th>File Size</th>
+                <th>Threat Classification</th>
+                <th>AI / Synthetic Probability</th>
+                <th>Primary Anomaly Marker</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="batch-table-body">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-tertiary); padding: 24px;">No files currently in triage queue. Drop files above to begin batch analysis.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -481,6 +537,47 @@
             </div>
           </div>
 
+          <!-- Multi-Spectral Microscope & Bit-Plane Decomposition Studio -->
+          <div class="glass-panel" style="margin-top: 24px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h4 style="font-size: 15px; font-weight: 700; color: var(--neon-cyan); margin-bottom: 2px;">
+                  &#x1F52C; Multi-Spectral Microscope &amp; Bit-Plane Decomposition
+                </h4>
+                <div style="font-size: 11.5px; color: var(--text-secondary);">
+                  Inspect isolated binary bit-planes (Bit 0 LSB to Bit 7 MSB), YCbCr chrominance separation, and high-frequency Sobel gradients.
+                </div>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button id="btn-toggle-loupe" class="btn-secondary" style="padding: 5px 12px; font-size: 11px;">
+                  &#x1F50D; 4x Precision Loupe: OFF
+                </button>
+              </div>
+            </div>
+
+            <div class="microscope-nav" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
+              <button class="lens-mode-pill active" data-lens="original">RGB Master</button>
+              <button class="lens-mode-pill" data-lens="bit0">Bit 0 (LSB Noise/Watermark)</button>
+              <button class="lens-mode-pill" data-lens="bit1">Bit 1</button>
+              <button class="lens-mode-pill" data-lens="bit2">Bit 2</button>
+              <button class="lens-mode-pill" data-lens="bit7">Bit 7 (MSB Structure)</button>
+              <button class="lens-mode-pill" data-lens="red">Red Channel</button>
+              <button class="lens-mode-pill" data-lens="green">Green Channel</button>
+              <button class="lens-mode-pill" data-lens="blue">Blue Channel</button>
+              <button class="lens-mode-pill" data-lens="ycbcr">YCbCr Chroma (Cr/Cb)</button>
+              <button class="lens-mode-pill" data-lens="sobel">Sobel High-Pass Edges</button>
+            </div>
+
+            <div style="position: relative; width: 100%; min-height: 240px; background: #010409; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255,255,255,0.08);">
+              <canvas id="microscope-canvas" style="max-width: 100%; max-height: 380px; object-fit: contain; cursor: crosshair;"></canvas>
+              <!-- Floating Precision 4x Loupe Reticle -->
+              <div id="loupe-reticle" style="display: none; position: absolute; width: 120px; height: 120px; border-radius: 50%; border: 2px solid var(--neon-cyan); box-shadow: 0 0 15px rgba(0,243,255,0.5); pointer-events: none; overflow: hidden; background: #000; z-index: 10;">
+                <canvas id="loupe-canvas" width="120" height="120" style="width: 100%; height: 100%;"></canvas>
+                <div id="loupe-info" style="position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-size: 8px; font-family: monospace; color: #fff; background: rgba(0,0,0,0.6);">RGB(0,0,0)</div>
+              </div>
+            </div>
+          </div>
+
           <div style="margin-top: 20px;">
             <h4 style="font-size: 13px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-secondary);">Forensic Evidentiary Markers</h4>
             <ul id="image-reasons-list" class="evidence-list"></ul>
@@ -561,6 +658,59 @@
               <div class="stat-label">Keyframe Grid Ratio</div>
               <div class="stat-value" id="metric-video-grid" style="font-size: 24px; color: #10b981;">--</div>
               <div class="stat-desc">Spatial 2D Fourier upsampling</div>
+            </div>
+          </div>
+
+          <!-- Optical Motion Vector Field & Frame Scrubber Studio -->
+          <div class="glass-panel" style="margin-top: 24px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h4 style="font-size: 15px; font-weight: 700; color: #f43f5e; margin-bottom: 2px;">
+                  &#x1F3A5; Optical Motion Vector Field &amp; Frame Scrubber Studio
+                </h4>
+                <div style="font-size: 11.5px; color: var(--text-secondary);">
+                  Quiver vector flow across temporal intervals. Scrutinize phase shifts and generative hallucination jitter frame-by-frame.
+                </div>
+              </div>
+              <div style="font-size: 11.5px; font-family: 'JetBrains Mono', monospace; color: var(--neon-cyan);">
+                Active Frame: #<span id="scrubber-active-frame-idx">1</span>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+              <div>
+                <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); margin-bottom: 6px;">
+                  OPTICAL FLOW VECTOR QUIVER (dx, dy):
+                </div>
+                <canvas id="video-motion-canvas" width="400" height="220" style="width: 100%; height: 180px; background: #020617; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);"></canvas>
+              </div>
+              <div>
+                <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); margin-bottom: 6px;">
+                  TEMPORAL JITTER HEAT PROFILE:
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px; justify-content: center; height: 180px; background: #020617; border-radius: 8px; padding: 14px; border: 1px solid rgba(255,255,255,0.08);">
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span>Vector Flow Coherence:</span>
+                    <span id="metric-flow-coherence" style="font-family: 'JetBrains Mono', monospace; color: #10b981; font-weight: 700;">--</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span>Mean Motion Velocity:</span>
+                    <span id="metric-flow-velocity" style="font-family: 'JetBrains Mono', monospace; color: #38bdf8; font-weight: 700;">--</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; font-size: 11px;">
+                    <span>Generative Morphing Anomaly:</span>
+                    <span id="metric-flow-morph" style="font-family: 'JetBrains Mono', monospace; color: #f43f5e; font-weight: 700;">--</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Frame Scrubber Strip -->
+            <div style="margin-top: 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);">
+              TEMPORAL KEYFRAME SCRUBBER (Click thumbnail to inspect frame motion):
+            </div>
+            <div class="frame-strip-wrapper" id="video-frame-strip">
+              <!-- Populated dynamically with extracted frame thumbnails -->
             </div>
           </div>
 
@@ -692,6 +842,50 @@
             </div>
           </div>
 
+          <!-- Biometric Formant Acoustic Vowel Space & Audio Filter Studio -->
+          <div class="glass-panel" style="margin-top: 24px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h4 style="font-size: 15px; font-weight: 700; color: #a855f7; margin-bottom: 2px;">
+                  &#x1F39B;&#xFE0F; Biometric Formant Vowel Space (F1 vs F2) &amp; Equalizer Filter
+                </h4>
+                <div style="font-size: 11.5px; color: var(--text-secondary);">
+                  Map vocal tract resonance peaks on IPA vowel quadrilateral (i, u, a, ae) to detect synthetic vocoder distortion and glottal flattening.
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button id="btn-play-filtered-audio" class="btn-primary" style="padding: 6px 14px; font-size: 12px;">
+                  &#x25B6; Play Filtered
+                </button>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+              <div>
+                <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); margin-bottom: 6px;">
+                  FORMANT FREQUENCY SCATTER (F1 vs F2 in Hz):
+                </div>
+                <canvas id="audio-formant-canvas" width="400" height="220" style="width: 100%; height: 180px; background: #020617; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);"></canvas>
+              </div>
+              <div>
+                <div style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary); margin-bottom: 6px;">
+                  ACOUSTIC BAND FILTER SELECTION:
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+                  <button class="audio-filter-pill active" data-filter="flat">Pass-Through (Flat)</button>
+                  <button class="audio-filter-pill" data-filter="vocal">Vocal Isolation (300Hz-3.4kHz)</button>
+                  <button class="audio-filter-pill" data-filter="highpass">High-Pass Vocoder (4kHz+)</button>
+                  <button class="audio-filter-pill" data-filter="subbass">Sub-Bass &amp; Rumble (0-150Hz)</button>
+                </div>
+                <div style="background: #020617; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); font-size: 11px; line-height: 1.6;">
+                  <div>F1 Formant Peak (First Harmonic): <strong id="metric-formant-f1" style="color: #a855f7;">--</strong></div>
+                  <div>F2 Formant Peak (Oral Cavity): <strong id="metric-formant-f2" style="color: #38bdf8;">--</strong></div>
+                  <div>Synthetic Vowel Dispersion: <strong id="metric-vowel-dispersion" style="color: #f59e0b;">--</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div style="margin-top: 20px;">
             <h4 style="font-size: 13px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-secondary);">Acoustic Evidentiary Markers</h4>
             <ul id="audio-reasons-list" class="evidence-list"></ul>
@@ -780,6 +974,37 @@
           <div style="margin-top: 20px;">
             <h4 style="font-size: 13px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 10px;">Sentence-by-Sentence Authenticity Heatmap</h4>
             <div id="sentence-heatmap-container"></div>
+          </div>
+
+          <!-- Token Perplexity Heatmap & Binoculars Lexical Radar -->
+          <div class="glass-panel" style="margin-top: 24px; padding: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h4 style="font-size: 15px; font-weight: 700; color: #10b981; margin-bottom: 2px;">
+                  &#x1F52C; Token Perplexity Heatmap &amp; Binoculars Contrast Radar
+                </h4>
+                <div style="font-size: 11.5px; color: var(--text-secondary);">
+                  Per-token log-likelihood estimate highlighting LLM token predictability. Low perplexity tokens indicate high model certainty.
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span style="font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);">
+                  Binoculars Ratio: <strong id="metric-binoculars-ratio" style="color: #38bdf8;">--</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Legend -->
+            <div style="display: flex; gap: 14px; font-size: 11px; margin-bottom: 12px; flex-wrap: wrap;">
+              <span><span class="token-chip token-crimson" style="padding: 1px 5px; font-size: 10px;">Word</span> High AI Confidence (PPL &lt; 8)</span>
+              <span><span class="token-chip token-amber" style="padding: 1px 5px; font-size: 10px;">Word</span> Moderate Predictability (PPL 8-25)</span>
+              <span><span class="token-chip token-emerald" style="padding: 1px 5px; font-size: 10px;">Word</span> Human Divergence (PPL &gt; 25)</span>
+            </div>
+
+            <!-- Token Chips Display -->
+            <div id="token-perplexity-container" style="background: #020617; padding: 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); max-height: 220px; overflow-y: auto; line-height: 1.8;">
+              <span style="color: var(--text-tertiary); font-size: 12px;">Token perplexity breakdown will appear here once text is analyzed.</span>
+            </div>
           </div>
 
           <div style="margin-top: 20px;">
@@ -1241,6 +1466,44 @@ No active scan manifest. Run an analysis in Visual, Acoustic, Video, or Cognitiv
     </div>
   </div>
 
+  <!-- Media URL Ingest Scanner Modal -->
+  <div id="url-scanner-modal" class="url-scanner-modal">
+    <div class="url-scanner-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: var(--neon-cyan); display: flex; align-items: center; gap: 8px;">
+          <span>&#x1F517;</span> Media URL Ingest Scanner
+        </h3>
+        <button id="btn-close-url-modal" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">&times;</button>
+      </div>
+      <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+        Fetch public online media (images, audio, video) via URL to immediately ingest and run comprehensive mathematical forensic analysis.
+      </p>
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 11px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px;">Media Target URL</label>
+        <input type="url" id="input-media-url" placeholder="https://example.com/media/sample.jpg" style="width: 100%; background: #030712; border: 1px solid #1e293b; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-family: 'JetBrains Mono', monospace; box-sizing: border-box;">
+      </div>
+      <div style="display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap;">
+        <label style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="radio" name="url-media-type" value="auto" checked> Auto-Detect
+        </label>
+        <label style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="radio" name="url-media-type" value="image"> Image
+        </label>
+        <label style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="radio" name="url-media-type" value="video"> Video
+        </label>
+        <label style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; cursor: pointer;">
+          <input type="radio" name="url-media-type" value="audio"> Audio
+        </label>
+      </div>
+      <div id="url-scanner-status" style="font-size: 12px; font-family: 'JetBrains Mono', monospace; margin-bottom: 14px; min-height: 18px; color: var(--neon-cyan);"></div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button id="btn-cancel-url-scan" class="btn-secondary">Cancel</button>
+        <button id="btn-submit-url-scan" class="btn-primary">&#x26A1; Fetch &amp; Ingest Media</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Script Includes -->
   <script src="js/client_engine.js?v=2.5"></script>
   <script src="js/app.js?v=2.5"></script>
@@ -1252,5 +1515,8 @@ No active scan manifest. Run an analysis in Visual, Acoustic, Video, or Cognitiv
   <script src="js/proxy_lab.js?v=2.5"></script>
   <script src="js/report_export.js?v=2.5"></script>
   <script src="js/sentinel_enhancements.js?v=2.5"></script>
+  <script src="js/batch_triage.js?v=2.5"></script>
+  <script src="js/url_scanner.js?v=2.5"></script>
+  <script src="js/war_room.js?v=2.5"></script>
 </body>
 </html>

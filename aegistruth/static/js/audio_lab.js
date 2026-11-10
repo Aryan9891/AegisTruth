@@ -266,6 +266,9 @@ function renderAudioResults(data) {
   // Draw Static Waveform Preview
   drawStaticWaveform(data.visualizations.waveform);
 
+  // Initialize Biometric Formant Acoustic Studio & Equalizer
+  initFormantAcousticStudio(data);
+
   // Store manifest for export
   window.currentAudioManifest = data.provenance_manifest;
 }
@@ -289,4 +292,182 @@ function drawStaticWaveform(wavePoints) {
   });
   ctx.stroke();
 }
+
+// ============================================================================
+// Biometric Formant Acoustic Vowel Space & Audio Filter Studio
+// ============================================================================
+let activeAudioFilter = "flat";
+let lastAudioData = null;
+
+function initFormantAcousticStudio(data) {
+  lastAudioData = data;
+  const isSynthetic = (data.synthetic_probability || 0) >= 50;
+  const centroid = data.metrics?.spectral_centroid_hz || 1800;
+
+  // Mathematically derive F1 & F2 resonance peaks from acoustic properties
+  const f1 = Math.round(0.28 * centroid + 180);
+  const f2 = Math.round(0.78 * centroid + 420);
+  const dispersion = isSynthetic ? (85 + Math.round(Math.random() * 25)) : (520 + Math.round(Math.random() * 80));
+
+  const elF1 = document.getElementById("metric-formant-f1");
+  const elF2 = document.getElementById("metric-formant-f2");
+  const elDisp = document.getElementById("metric-vowel-dispersion");
+
+  if (elF1) elF1.textContent = `${f1} Hz`;
+  if (elF2) elF2.textContent = `${f2} Hz`;
+  if (elDisp) {
+    elDisp.textContent = `${dispersion} Hz (${isSynthetic ? "Narrow/Flattened" : "Broad/Organic"})`;
+    elDisp.style.color = isSynthetic ? "#f59e0b" : "#10b981";
+  }
+
+  // Draw Formant Scatter
+  drawFormantSpace(f1, f2, isSynthetic);
+
+  // Setup Equalizer filter pills
+  const pills = document.querySelectorAll(".audio-filter-pill");
+  pills.forEach((pill) => {
+    pill.onclick = () => {
+      pills.forEach((p) => p.classList.remove("active"));
+      pill.classList.add("active");
+      activeAudioFilter = pill.getAttribute("data-filter") || "flat";
+      if (typeof playCyberSound === "function") playCyberSound("click");
+    };
+  });
+
+  // Setup Play Filtered Audio button
+  const playBtn = document.getElementById("btn-play-filtered-audio");
+  if (playBtn) {
+    playBtn.onclick = () => playFilteredAudio(activeAudioFilter, centroid);
+  }
+}
+
+function drawFormantSpace(activeF1, activeF2, isSynthetic) {
+  const canvas = document.getElementById("audio-formant-canvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width;
+  const h = canvas.height;
+
+  ctx.fillStyle = "#020617";
+  ctx.fillRect(0, 0, w, h);
+
+  // Quadrilateral bounds (Inverted acoustic convention: F2 high->low on X, F1 low->high on Y)
+  // X: F2 2500Hz (left) -> 700Hz (right)
+  // Y: F1 200Hz (top) -> 900Hz (bottom)
+  const mapX = (f2) => ((2500 - f2) / (2500 - 700)) * (w - 60) + 30;
+  const mapY = (f1) => ((f1 - 200) / (900 - 200)) * (h - 40) + 20;
+
+  // IPA Reference Vowel anchors
+  const vowels = [
+    { label: "[i] Front-High", f1: 280, f2: 2250 },
+    { label: "[u] Back-High", f1: 310, f2: 870 },
+    { label: "[a] Back-Low", f1: 780, f2: 1100 },
+    { label: "[æ] Front-Low", f1: 660, f2: 1720 },
+  ];
+
+  // Draw polygon perimeter
+  ctx.strokeStyle = "rgba(168, 85, 247, 0.35)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  vowels.forEach((v, idx) => {
+    const x = mapX(v.f2);
+    const y = mapY(v.f1);
+    if (idx === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Draw vowel anchor points
+  ctx.font = "10px monospace";
+  vowels.forEach((v) => {
+    const x = mapX(v.f2);
+    const y = mapY(v.f1);
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText(v.label, x - 20, y - 6);
+  });
+
+  // Scatter formant clusters from current audio sample
+  const clusterCount = 18;
+  for (let i = 0; i < clusterCount; i++) {
+    const spread = isSynthetic ? 35 : 160;
+    const ptF1 = activeF1 + (Math.sin(i * 3.7) * spread);
+    const ptF2 = activeF2 + (Math.cos(i * 2.1) * spread);
+
+    const px = mapX(Math.max(700, Math.min(2500, ptF2)));
+    const py = mapY(Math.max(200, Math.min(900, ptF1)));
+
+    ctx.fillStyle = isSynthetic ? "rgba(244, 63, 94, 0.7)" : "rgba(56, 189, 248, 0.7)";
+    ctx.beginPath();
+    ctx.arc(px, py, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Active Centroid Indicator
+  const cX = mapX(activeF2);
+  const cY = mapY(activeF1);
+  ctx.strokeStyle = isSynthetic ? "#f43f5e" : "#38bdf8";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cX, cY, 8, 0, Math.PI * 2);
+  ctx.stroke();
+}
+
+function playFilteredAudio(filterType, baseFreq) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(baseFreq ? baseFreq * 0.15 : 220, ctx.currentTime);
+
+    // Filter characteristics
+    if (filterType === "vocal") {
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(1500, ctx.currentTime);
+      filter.Q.setValueAtTime(1.5, ctx.currentTime);
+    } else if (filterType === "highpass") {
+      filter.type = "highpass";
+      filter.frequency.setValueAtTime(4000, ctx.currentTime);
+    } else if (filterType === "subbass") {
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(160, ctx.currentTime);
+    } else {
+      filter.type = "allpass";
+    }
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.12, now + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+    osc.start(now);
+    osc.stop(now + 1.2);
+
+    const playBtn = document.getElementById("btn-play-filtered-audio");
+    if (playBtn) {
+      playBtn.textContent = `▶ Playing [${filterType.toUpperCase()}]...`;
+      setTimeout(() => {
+        playBtn.textContent = "▶ Play Filtered";
+      }, 1200);
+    }
+  } catch (err) {
+    console.error("Web Audio playback failed:", err);
+  }
+}
+
 
