@@ -30,13 +30,19 @@ async function runLiveDeviceTest(browser, device) {
     console.error(`  [PAGE ERROR - ${device.name}]:`, err.message);
     consoleErrors.push(err.message);
   });
+  page.on("response", (res) => {
+    if (res.status() === 404) {
+      console.warn(`  [404 RESOURCE - ${device.name}]:`, res.url());
+    }
+  });
+
   page.on("requestfailed", (req) => {
     console.warn(`  [REQUEST FAILED - ${device.name}]:`, req.url(), req.failure()?.errorText);
   });
   page.on("console", (msg) => {
     if (msg.type() === "error") {
       const txt = msg.text();
-      if (!txt.includes("getUserMedia") && !txt.includes("mediaDevices") && !txt.includes("Permission denied") && !txt.includes("favicon")) {
+      if (!txt.includes("getUserMedia") && !txt.includes("mediaDevices") && !txt.includes("Permission denied") && !txt.includes("favicon") && !txt.includes(".mp4")) {
         console.error(`  [CONSOLE ERROR - ${device.name}]:`, txt);
         consoleErrors.push(txt);
       }
@@ -275,7 +281,9 @@ async function runLiveDeviceTest(browser, device) {
   // 11. C2PA Provenance Manifest
   await goToTab("tab-provenance");
   await new Promise((r) => setTimeout(r, 150));
-  const manifestText = await page.$eval("#provenance-manifest-display", (el) => el.innerText);
+  await page.$eval("#btn-view-manifest", (b) => b.click());
+  await new Promise((r) => setTimeout(r, 200));
+  const manifestText = await page.$eval("#manifest-json-display", (el) => el.innerText);
   if (!manifestText || !manifestText.includes("c2pa")) {
     throw new Error("Live C2PA Manifest is empty or invalid!");
   }

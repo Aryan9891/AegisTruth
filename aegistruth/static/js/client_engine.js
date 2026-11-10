@@ -31,6 +31,12 @@
 
   // Probe backend on startup
   async function probeBackend() {
+    if (window.FORCE_CLIENT_ENGINE || window.location.hostname.endsWith("github.io") || window.location.protocol === "file:") {
+      backendReachable = false;
+      updateEngineBadge(false);
+      return;
+    }
+
     try {
       const res = await nativeFetch("/api/report/health", { method: "GET" });
       if (res.ok) {
